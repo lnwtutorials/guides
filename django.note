@@ -1,0 +1,30 @@
+Django
+pip-3 freeze (list of all installed)
+Tut01 = https://docs.djangoproject.com/en/2.2/intro/tutorial01/
+---------------------------------------------------------------
+django-admin startproject mysite     (Creating a new Project with named mysite)
+# python manage.py runserver 0:8000 > 2&1
+# python manage.py startapp polls    (Creating polls App )
+
+MVT ( Model-View-Template)
+http://cleverprogrammer.to/first-client-with-python
+{ % for choice in question.choice_set.all %}
+Admin Interface
+----------------Tup02=  https://docs.djangoproject.com/en/2.2/intro/tutorial02/
+Setting up database:
+# dnf install postgresql-server postgresql
+# postgresql-setup --initdb
+# systemctl start postgresql
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'USER': 'mydatabaseuser',
+        'NAME': 'mydatabase',
+        'TEST': {
+            'NAME': 'mytestdatabase',
+        },
+    },
+}
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
