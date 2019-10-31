@@ -1,0 +1,14 @@
+ https://www.postgresql.org/docs/10/index.html
+==============================================
+su - postgres
+ createdb mydb
+ psql mydb
+ > select version();
+ > select current_day;
+ > select current_time;
+ > select 2+2;
+CREATE DATABASE yourdbname;
+CREATE USER youruser WITH ENCRYPTED PASSWORD 'yourpass';
+GRANT ALL PRIVILEGES ON DATABASE yourdbname TO youruser;
+-----------------------------------------------------
+https://stackoverflow.com/questions/2942485/psql-fatal-ident-authentication-failed-for-user-postgres#11545725
