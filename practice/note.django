@@ -1,0 +1,90 @@
+Django
+pip-3 freeze (list of all installed)
+.......................................................................................................................
+Tut01 
+https://docs.djangoproject.com/en/2.2/intro/tutorial01/
+.......................................................................................................................
+pip3 install django
+python3 -m django --version
+
+django-admin startproject mysite     (Creating a new Project with named mysite)
+# python manage.py runserver 0:8000 > 2&1
+# python manage.py startapp polls    (Creating polls App )
+# python3 manage.py diffsettings     (Difference b/w current settings file and Django’s default settings.)
+
+MVT ( Model-View-Template)
+http://cleverprogrammer.to/first-client-with-python
+{ % for choice in question.choice_set.all %}
+
+https://docs.djangoproject.com/en/2.2/ref/django-admin/   (Difference b/w Django-Admin & manage.py)
+https://docs.djangoproject.com/en/2.2/topics/settings/    (Django settings = 'mysite/settings.py')
+
+.......................................................................................................................
+Tut02  
+https://docs.djangoproject.com/en/2.2/intro/tutorial02/
+.......................................................................................................................
+
+Setting up database:
+# dnf install postgresql-server postgresql
+# postgresql-setup --initdb
+# systemctl start postgresql
+
+# dnf install libpq-devel postgresql-contrib
+# pip3 install psycopg2-binary
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+DATABASES = {
+    'default': {
+        #'ENGINE': 'django.db.backends.sqlite3',
+        #'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME' : 'mydb',
+        'USER' : 'mydbuser',
+        'PASSWORD' : 'mypassword',
+        'HOST' : '127.0.0.1',
+        'PORT' : '5432',
+        'TEST' : {
+            'NAME' : 'testdb',
+            },
+    },
+}
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# python3 manage.py makemigrations
+# python3 manage.py migrate
+# python3 manage.py migrate
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+In our simple poll app, we’ll create two models: Question and Choice. A Question has a question and a publication date. 
+A Choice has two fields: the text of the choice and a vote tally. Each Choice is associated with a Question.
+
+# vim polls/models.py
+---------------------------------------------------------------------
+from django.db import models
+
+class Question(models.Model):
+    question_text = models.CharField(max_length=200)
+    pub_date = models.DateTimeField('date published')
+
+class Choice(models.Model):
+    question = models.ForeignKey(Question, on_delete=models.CASCADE)
+    choice_text = models.CharField(max_length=200)
+    votes = models.IntegerField(default=0)
+---------------------------------------------------------------------
+# vim mysite/settings.py
+INSTALLED_APPS = [
+        'polls.apps.PollsConfig',
+        ]
+# python3 manage.py makemigrations polls
+# less polls/migrations/0001_initial.py
+# python3 manage.py sqlmigrate polls 0001
+# python3 manage.py migrate
+
+REMEMBER :- #########
+  => Change your models (in models.py).
+  => Run python manage.py makemigrations to create migrations for those changes
+  => Run python manage.py migrate to apply those changes to the database.
+
+--------------------
+Playing with the API
+--------------------
+https://docs.djangoproject.com/en/2.2/topics/db/queries/     (Exploring Database API)
+
+

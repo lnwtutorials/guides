@@ -1,0 +1,23 @@
+ https://www.postgresql.org/docs/10/index.html
+==============================================
+su - postgres
+ createdb mydb
+ psql mydb
+ > select version();
+ > select current_day;
+ > select current_time;
+ > select 2+2;
+-----------------------------------------------------
+CREATE DATABASE yourdbname;
+CREATE USER youruser WITH ENCRYPTED PASSWORD 'yourpass';
+GRANT ALL PRIVILEGES ON DATABASE yourdbname TO youruser;
+-----------------------------------------------------
+vim /var/lib/pgsql/data/pg_hba.conf (Need to change trust with ident)
+
+#host    all             all             127.0.0.1/32            ident
+host    all             all             127.0.0.1/32            trust
+-----------------------------------------------------
+U = user ;; d = database ;; p = port ;; h = hostserver ip ;; W = Prompt fro pass
+# psql -U mydbuser -d mydb -h 127.0.0.1 -p 5432 -W
+-----------------------------------------------------
+https://stackoverflow.com/questions/2942485/psql-fatal-ident-authentication-failed-for-user-postgres#11545725
