@@ -1,48 +1,83 @@
 Django
 .......................................................................................................................
-[FirstSetup]
+[Installing package and setting up django]
+------------------------------------------
 # dnf install python3 python3-pip python3-virtualenv -y
 # virtualenv-3 newenv
 # source newenv/bin/activate
 # pip3 install django psycopg2-binary
 # dnf install libpq-devel postgresql-contrib postgresql postgresql-server
 
-django-admin startproject mysite
-cd mysite/
-vim mysite/settings.py 
-django-admin manage.py runserver 0:8080
+# pip3 install django           (install)
+# python3 -m django --version   (To check version of django)
+# pip-3 freeze (list of all installed packages or modules)
 
-.......................................................................................................................
-pip-3 freeze (list of all installed)
-.......................................................................................................................
-Tut01 
-https://docs.djangoproject.com/en/2.2/intro/tutorial01/
-.......................................................................................................................
-pip3 install django
-python3 -m django --version
+[Writing First APP]             https://docs.djangoproject.com/en/2.2/intro/tutorial01/#writing-your-first-django-app-part-1
+-------------------
+# django-admin startproject mysite
+# cd mysite/
+# vim mysite/settings.py
+# django-admin manage.py runserver 0:8080
 
-django-admin startproject mysite     (Creating a new Project with named mysite)
+# django-admin startproject mysite     (Creating a new Project with named mysite)
 # python manage.py runserver 0:8000 > 2&1
 # python manage.py startapp polls    (Creating polls App )
 # python3 manage.py diffsettings     (Difference b/w current settings file and Django’s default settings.)
+    
+    
+[Writing Our First Views]         https://docs.djangoproject.com/en/2.2/intro/tutorial01/#write-your-first-view
+---------------------------
+## python3 manage.py startapp polls
+## vim polls/views.py
+        from django.http import HttpResponse
+        def index(request):
+            return HttpResponse("Hello, world. You're at the polls index.")
+## vim polls/urls.py
+        from django.urls import path
+        from . import views
+        urlpatterns = [
+            path('', views.index, name='index'),
+                ]
+## vim mysite/urls.py
+        from django.contrib import admin
+        from django.urls import include, path
+        urlpatterns = [
+            path('polls/', include('polls.urls')),
+            path('admin/', admin.site.urls),
+                ]
+## python3 manage.py runserver 0:8080
 
+Notes -:
+I) The path() function is passed four arguments, two required: "route and view, and two optional: kwargs, and name. At this point, it’s worth reviewing what these arguments are for.
+    1. path() argument: route => route is a string that contains a URL pattern. When processing a request, Django starts at the first pattern in urlpatterns and makes its way down the list, comparing the requested URL against each pattern until it finds one that matches. 
+        [[Patterns don’t search GET and POST parameters, or the domain name. For example, in a request to https://www.example.com/myapp/, the URLconf will look for myapp/. In a request to https://www.example.com/myapp/?page=3, the URLconf will also look for myapp/. ]]
+    2. path() argument: view => When Django finds a matching pattern, it calls the specified view function with an HttpRequest object as the first argument and any “captured” values from the route as keyword arguments. We’ll give an example of this in a bit.
+    3. path() argument: kwargs=> Arbitrary keyword arguments can be passed in a dictionary to the target view. We aren’t going to use this feature of Django in the tutorial.
+    4. path() argument: name => Naming your URL lets you refer to it unambiguously from elsewhere in Django, especially from within templates. This powerful feature allows you to make global changes to the URL patterns of your project while only touching a single file.
+II). Useful urls
+    https://docs.djangoproject.com/en/2.2/ref/django-admin/   (Difference b/w Django-Admin & manage.py)
+    https://docs.djangoproject.com/en/2.2/topics/settings/    (Django settings = 'mysite/settings.py')
+......................................................................................................................
 MVT ( Model-View-Template)
 http://cleverprogrammer.to/first-client-with-python
 { % for choice in question.choice_set.all %}
-
-https://docs.djangoproject.com/en/2.2/ref/django-admin/   (Difference b/w Django-Admin & manage.py)
-https://docs.djangoproject.com/en/2.2/topics/settings/    (Django settings = 'mysite/settings.py')
-
 .......................................................................................................................
-Tut02  
-https://docs.djangoproject.com/en/2.2/intro/tutorial02/
-.......................................................................................................................
+Tut02  https://docs.djangoproject.com/en/2.2/intro/tutorial02/
 
-Setting up database:
+******* mysite/settings.py*****
+[By default, INSTALLED_APPS contains the following apps, all of which come with Django:]
+    * django.contrib.admin – The admin site. You’ll use it shortly.
+    * django.contrib.auth – An authentication system.
+    * django.contrib.contenttypes – A framework for content types.
+    * django.contrib.sessions – A session framework.
+    * django.contrib.messages – A messaging framework.
+    * django.contrib.staticfiles – A framework for managing static files.
+
+[Setting up database postgresql:]
+---------------------------------
 # dnf install postgresql-server postgresql
 # postgresql-setup --initdb
 # systemctl start postgresql
-
 # dnf install libpq-devel postgresql-contrib
 # pip3 install psycopg2-binary
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -69,23 +104,20 @@ DATABASES = {
 In our simple poll app, we’ll create two models: Question and Choice. A Question has a question and a publication date. 
 A Choice has two fields: the text of the choice and a vote tally. Each Choice is associated with a Question.
 
-# vim polls/models.py
----------------------------------------------------------------------
-from django.db import models
+## vim polls/models.py
+        from django.db import models
+        class Question(models.Model):
+            question_text = models.CharField(max_length=200)
+            pub_date = models.DateTimeField('date published')
 
-class Question(models.Model):
-    question_text = models.CharField(max_length=200)
-    pub_date = models.DateTimeField('date published')
-
-class Choice(models.Model):
-    question = models.ForeignKey(Question, on_delete=models.CASCADE)
-    choice_text = models.CharField(max_length=200)
-    votes = models.IntegerField(default=0)
----------------------------------------------------------------------
+        class Choice(models.Model):
+            question = models.ForeignKey(Question, on_delete=models.CASCADE)
+            choice_text = models.CharField(max_length=200)
+            votes = models.IntegerField(default=0)
 # vim mysite/settings.py
-INSTALLED_APPS = [
-        'polls.apps.PollsConfig',
-        ]
+        INSTALLED_APPS = [
+            'polls.apps.PollsConfig',
+                ]
 # python3 manage.py makemigrations polls
 # less polls/migrations/0001_initial.py
 # python3 manage.py sqlmigrate polls 0001
