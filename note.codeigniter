@@ -1,0 +1,29 @@
+## [CodeIgniter3.0]
+[MVC]
+Model => update,create Queries for records inside DB
+View => webpage/design pages
+Controller => responsible for entire (front Phase)
+
+What Are Helpers
+-----------------
+* Helpers are the predefine classes made inside codeigniter framework which helps the developeres to perfrom many useful tasks such as,
+* Linking external files like CSS and JS using URL helper.
+* Creating Form using form helper and many more
+
+[https://w3lessons.info/removing-index-php-from-codeigniter-url/]
+----------------------------------------------------------------------------
+[.htaccess]
+RewriteEngine on
+RewriteCond $1 !^(index\.php|resources|robots\.txt)
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ index.php/$1 [L,QSA]
+----------------------------------------------------------------------------
+[nginx.conf]
+location / {
+       	try_files $uri $uri/ /index.php?$args;
+        }
+----------------------------------------------------------------------------
+bootswatch.com
+https://www.google.com/url?sa=t&rct=j&q=&esrc=s&source=web&cd=3&cad=rja&uact=8&ved=2ahUKEwjR9e_e577lAhWPF3IKHZozAPMQFjACegQIDBAG&url=https%3A%2F%2Fwww.educba.com%2Fuses-of-python%2F&usg=AOvVaw1Rpqx-iFS_hr__Xv_QOR91
+
