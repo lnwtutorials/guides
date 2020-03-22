@@ -1,0 +1,216 @@
+
+Introduction
+   • Mysql is a open-source database management system. 
+   • It is multi-user multithreaded database management system. 
+   • MySQL is popular on the web.
+   • LAMP = Linux Apache MySQL and PHP.
+   • MySQL run on BSD Unix, Linux,Windows or Mac.
+
+   • MySQL began in 1994 by a Swedish company MySQL AB.
+   • Sun Microsystem acquired MySQL AB in 2008.
+   • Sun was bought by Oracle in 2010
+   • MySQL, PostgreSQL, Firebird, SQLite, Derby, and HSQLDB are the most well known open source database systems.
+   • MySQL is developed in C/C++.
+   • MySQL supports APIs C/C++ alongwith PHP,Python, Java, C#, Diffel, Ruby, Tcl or Perl
+
+MySQL comes in two version:
+   • MySQL Server System (server software and the client libraries are dual-licensed)
+   • MySQL Embedded System (https://en.wikipedia.org/wiki/Embedded_database) (https://www.oracle.com/mysql/embedded.html)
+
+[MySQL database, various mysql command line tools and the SQL language covered by the database engine. It is an introductory tutorial for the beginners]
+
+(Centos-8) installation
+# dnf install @mysql
+# systemctl status mysqld.service
+
+Q. How to Connect with Database?
+# mysql --version
+# mysql -u root -h localhost -p
+
+Q.Some Important commands 
+https://dev.mysql.com/doc/refman/8.0/en/examples.html
+> select version();
+> select database();
+> select current_user();
+> show databases;
+> use db_name;
+> show tables;
+> show create table anyTableName;
+> show create database mydb;
+> show session variables;
+> show procedure status;      (or call functions)
+> show functions status;
+> show procedure status where Db='mydb';
+> show create procedure mydb.while_example;
+
+#mysqladmin commands
+# mysqladmin -u root -p ping 
+# mysqladmin -u root -p version
+# mysqladmin -u root -p variable
+# mysqladmin -u root -p reload
+# mysqladmin -u root -p refresh
+# mysqladmin -u root -p shutdown
+# mysqladmin -u root -p status
+# mysqladmin -u root -p extended-status
+# mysqladmin -u root -p debug
+# mysqladmin -u root -p stop-slave
+# mysqladmin -u root -p start-slave
+-----------------------------------------------------------
+1. flush-hosts: Flush all host information from host cache.
+2. flush-tables: Flush all tables.
+3. flush-threads: Flush all threads cache.
+4. flush-logs: Flush all information logs.
+5. flush-privileges: Reload the grant tables (same as reload).
+6. flush-status: Clear status variables.
+-----------------------------------------------------------
+# mysqladmin -u root -p processlist
+# mysqladmin -h 192.168.56.13 -u root -p processlist
+# mysqladmin -u root -p kill <ID>
+
+Multiple commands at same time
+# mysqladmin -u root processlist status version
+(https://www.tecmint.com/mysqladmin-commands-for-database-administration-in-linux/)
+(https://www.tecmint.com/how-to-setup-mysql-master-slave-replication-in-rhel-centos-fedora/)
+
+Q. Setting up a new password:
+> set password=password('newpass')
+Removing pass
+> set password=password('')
+
+Types of database:- (https://www.tutorialspoint.com/Types-of-databases)
+   • Centralised database.
+   • Distributed database. (Homegenous + Haterogeneous)
+   • Personal database.
+   • End-user database. (most probably shared database)
+   • Commercial database.
+   • NoSQL database.     ( large set of distributed data )
+   • Operational database.   (Reports,Analyze,Dashboards)
+   • Relational database.    (Strucrture Query Lang. )
+   • Cloud database.
+   • Object-oriented database.  (collection of OOP+Relation DB)
+   • Graph database.
+
+Q.What is data structure in database ?
+   • Data Structure refers to the actual implementation of the data type and offers a way of storing data in an efficient manner. 
+   • Data Structure is an outcome of application of certain tools and techniques used to connect data items within records and between records of the same file or of different files.
+
+Q.Difference between Data Structure and DBMS ?
+A. The main difference between database and data structure is that 
+   • Database is a collection of data that is stored and managed in permanent memory 
+   • While data structure is a way of storing and arranging data efficiently in temporary memory.
+
+Q.Type of SQL Commands? 
+These SQL commands are mainly categorized into four categories as:
+(https://www.geeksforgeeks.org/sql-ddl-dql-dml-dcl-tcl-commands/)
+1. DDL – Data Definition Language
+      1- create
+      2- ALTER
+      3- DROP
+      4- RENAME
+      5- TRUNCAE
+      6- COMMENT
+2. DQl – Data Query Language
+      1- Select
+3. DML – Data Manipulation Language
+      1- Insert
+      2- Update
+      3- Delete
+      4- Merge
+      5- Call
+      6- Explain Plan
+      7- LOCK TABLE
+4. DCL – Data Control Language
+      1- Grant
+      2- Revoke
+      3- 
+# wget http://downloads.mysql.com/docs/world.sql.gz 
+
+DDL Query command example:-
+1.Creating a DB and user for accessing.
+> create database world;
+> create user me@localhost identified by 'pass';
+> grant all on world.* to 'me'@'localhost';
+
+2.Creating a table and updating records.
+#CREATE
+# create table pet ( name varchar(20), owner varchar(20) , sex char(1) ,birth DATE, death DATE);
+# INSERT into pet values ('claws','Mike',"f","2015-11-22",NULL);
+# LOAD data local infile '/var/lib/mysql/pet-data' into table pet;
+# show create table pet;
+
+# create table shop( article int(4)not null auto_increment, dealer char(20) default '' not null, price decimal(10,2) default '0.00' not null, primary key(article));
+# insert into shop(dealer,price) values('R.K. Batra','200.80');
+
+#ALTER
+⇒ Modify definition of Column
+     > alter table pet MODIFY name varchar(25);
+⇒ Add column after specific column
+     > alter table pet ADD id int(3) after birth;
+⇒ Drop column of Table
+     > alter table pet DROP ID;
+⇒ Changing/Rename column
+     > alter table pet change name Full_Name varchar(20) ;
+
+#RENAME
+> RENAME table pet to pat;
+> ALTER table pat RENAME new_pet;
+
+LOCK TABLE old_table1 WRITE;
+RENAME TABLE old_table1 TO new_table1,
+             new_table1 TO new_table2;
+[https://dev.mysql.com/doc/refman/8.0/en/rename-table.html]
+
+
+#Comment
+#
+--
+/* */
+[https://dev.mysql.com/doc/refman/8.0/en/comments.html]
+
+#LOG
+      ◇ First need to enable for logs
+> set global log_output = 'TABLE';
+> set global general_log = 'ON';
+
+> select * from general_log limit 5;
+      ◇ Cleanup logs
+> SET GLOBAL general_log=OFF;
+> TRUNCATE table mysql.general_log;
+> SET GLOBAL general_log=ON;
+
+2.DQL Query command example:-
+#SELECT
+
+3. DML – Data Manipulation Language
+#Insert    #Update    #Delete    #Merge     #Call      #Explain Plan        #LOCK TABLE
+
+
+
+************************************************************************************
+#Procedure
+      ◇ show procedure status
+      ◇ show procedure status where Db='mydb'
+      ◇ show create procedure mydb.while_example; 
+[https://www.mysqltutorial.org/mysql-stored-procedure/mysql-drop-procedure/]
+[https://dev.mysql.com/doc/refman/8.0/en/drop-procedure.html]
+
+#Warning
+\W
+\w
+https://dev.mysql.com/doc/refman/8.0/en/show-warnings.html
+
+# select (select ID from city order by ID asc limit 1) as 'IN', (select ID from city order by ID desc limit 1) as 'OUT';
+
+SELECT 
+(SELECT column FROM table WHERE [condition] ORDER BY column LIMIT 1) as 'first',
+(SELECT column FROM table WHERE [condition] ORDER BY column DESC LIMIT 1) as 'last'
+
+https://stackoverflow.com/questions/2735395/how-to-find-first-and-last-record-from-mysql-table
+https://stackoverflow.com/questions/5125096/for-loop-example-in-mysql
+https://dev.mysql.com/doc/refman/5.7/en/loop.html
+
+MariaDB [world]> #CREATE procedure world.for_loop_example() wholeblock:BEGIN   DECLARE x INT;   DECLARE str VARCHAR(255);   SET x = -5;   SET str = '';    loop_label: LOOP     IF x > 0 THEN       LEAVE loop_label;     END IF;     SET str = CONCAT(str,x,',');     SET x = x + 1;     ITERATE loop_label;   END LOOP;    SELECT str;  END//
+MariaDB [world]> 
+MariaDB [world]> call world.for_loop_example();
+
+
