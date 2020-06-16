@@ -1,0 +1,507 @@
+"""
+Python Object And Data Structure Basics
+01-Numbers 
+01-Variable Assignment 
+02-Strings 
+03-Print Formatting with Strings 
+04-Lists 
+05-Dictionaries 
+06-Tuples 
+07-Sets and Booleans 
+08-Files 
+09-Objects and Data Structures Assessment Test 
+10-Objects and Data Structures Assessment Test-Solution 
+"""
+"""
+a=5 ; b=3
+c=a+b
+print(c)        # +  Additon
+print(a-b)      # -  Difference
+print(a*b)      # *  Multiply
+print(a/b)      # /  Divide
+print(a%b)      # modulo or Remainder
+print(a//b)     # // Floor Divison
+print(a**b)     # a Power b
+d=a
+if d == a:
+    print("Equal")
+else:
+    print("Not equal")
+"""
+j = 'Rohit';k = 'Kumar'
+print("Output:\n%s \n%r \n%15.2f. " %(j,k,1290.808)) 
+#https://docs.python.org/3/library/stdtypes.html#old-string-formatting
+print("Here i will {}".format('Insert'))
+print("{2} {1} {0} ".format('Quick','Brown','FOX'))
+print("{a} {b} {c}".format(a='Hello',b="insert",c=12.432))
+
+print("{0:8} | {1:9}".format('Fruit','Quantity'))
+print("{0:8} | {1:5}".format('Apple',5.))
+print("{0:8} | {1:5}".format('banana',10))
+
+print('{0:.<10}|{1:.^10}|{2:.>10}'.format('left','Center','Right'))
+print('{0:.<10}|{1:.^10}|{2:.>10}'.format('11','22','33'))
+
+x=0;
+while x<10:
+    x+=1
+    #print(f" Now value a x is {x}")
+    if x == 4:
+        continue
+    if x == 7:
+        print("I'll break at %d." %x)
+        break
+else:
+    print("all Done")
+
+# List is a collection which is ordered and changeable. Allows duplicate members.
+# Dictionary is a collection which is unordered, changeable and indexed.No duplicate members.
+# Tuple is a collection which is ordered and unchangeable. Allows duplicate members.
+# Set is a collection which is unordered and unindexed and  uniqe members. (No Duplicate)
+
+l = [1,2,3,4,5,4,3,2]                   []  # Duplicate,  change,       index
+d = {'a':[1,'xyz',4],'b':2,}           {} # Uniqe,       change,       index
+t = (2,3,4,2)                               ()  # Duplicate, non-change,index
+s = set()                                     {} # Uniq,         change,       No-index
+
+#print(f"list: {l} \ndict: {d} \ntup: {t} \nSet: {s}  ")
+#l.append(99) ; l[2] = 200
+s.add('a') ; s.add('b') ; s.add('a')
+s1 = set(l) ; print(f"\n {s}\n {s1}\n {d['a'][1][::-1]}")
+d['c'] = 3 ; d['d'] = 5 ; print(f"\n Keys: {d.keys()}\n {d.values()} ")
+for i in d.keys(): print(f"{i} => {d[i]}")
+
+#List
+l = [4,4,1,1,6,1,9]
+l.sort()
+l.append(5)
+l.remove(1)
+l.pop()
+l[0]=10
+a = l.copy()
+#l.clear()
+print(l)
+print(l.count(1))
+
+l1 = [ x for x in 'Hello' ]
+l2 = [ y**2 for y in range(2,6) ]           # calculate power
+l3 = [ x for x in range(15) if x%2 == 0 ]  # Check Even number
+
+celcius = [20,10.2,0,1,30,2]
+ferenhite = [ ((9/5)*c+32) for c in celcius ]
+l4 = [ x**2 for x in [y**2 for y in range(5)] ]
+print(l4)
+
+#Dictionary
+d = {'k1':'v1','k2':'v2'}
+d['k1'] = 'value1'
+b = d.copy()
+print(type(d))
+print(d.keys())
+print(d.values())
+print(d.items())
+for i in [ x for x in d.keys()]:
+    #print(f"{i}:{d[i]}")
+    print("{}:{}".format(i,d[i]))
+
+#Tuples
+t = (1,5,6,3,5,6,4)
+print(type(t))
+print(t)
+print(t.count(5))
+print(t.index(4))
+
+#set
+s = set()
+
+********************************************************************************************************
+[Exception Handling]
+def prob1():
+    for i in [1,'a','b']:
+        try:
+            print(i**2)
+        except:
+            print("here require num for power")
+        finally:
+            print("end")
+prob1()
+
+def prob2():
+     x=5
+     y=0
+     try:
+         x/y
+     except:
+         print("Not defined")
+     finally:
+         print("final block")
+prob2()
+
+def prob3():
+     while True:
+         try:
+             num1=int(input("number for square : "))
+         except:
+             print("Retry, input not valid!!")
+             continue
+         else:
+             print(f"Square of number {num1} is = {num1**2}")
+             break
+         finally:
+            print("finally done!")
+prob3()
+
+def ask_int():
+     while True:
+         try:
+             num2 = int(input("Input your number: "))        
+         except:
+             print("Seems Input is not a integer")
+             continue
+         else:
+             print("Valid int")
+             print(num2)
+             break
+         finally:
+             print("Finally Block executed")
+ask_int()
+
+import sys
+vpass='pass'
+p_input=input("Input your pass: ")
+if vpass == p_input:
+     print("Password validated")
+else:
+     "Not Permitted."
+     sys.exit(0)
+print("Welcome to Next Level")
+
+********************************************************************************************************
+[Function]
+
+*args
+**kwargs
+
+/root/lab/work-old/python/py3_script
+
+#print('dog' in 'A Dog ran away'.lower())
+
+def myfunc1(*args):
+    print(args)
+    #for i in args:print(i)
+#myfunc1('a','b',1,3,54,76)
+
+def myfunc2(**kwargs):
+    '''
+    Docstring: Information
+    input: some argument
+    output: printing
+    '''
+    print(kwargs)
+    if 'fruit' in kwargs:
+        print("My choice {} ".format(kwargs['fruit']))
+    else:
+        print('Match Not Found')
+#help(myfunc2)
+#myfunc2(fruit='apple',b='banana',c='chickoo')
+
+def my_func(*args1,**kwargs1):
+    print(args1)
+    print(kwargs1)
+    print("I like to have {} {}.".format(args1[0],kwargs1['bird']))
+my_func(20,30,animal='dog',fruit='apple',food='eggs',bird='sparrow')
+********************************************************************************************************
+[Object Oriented Programming]
+https://jeffknupp.com/blog/2014/06/18/improve-your-python-python-classes-and-object-oriented-programming/
+https://www.tutorialspoint.com/python/python_classes_objects.htm
+
+⇒ Object Oriented Programming (OOP) tends to be one of the major obstacles for beginners when they are first starting to learn Python.
+⇒ There are many, many tutorials and lessons covering OOP so feel free to Google search other lessons, and I have also put some links to other useful tutorials online at the bottom of this Notebook.
+Topics:
+    Objects
+    Using the class keyword
+    Creating class attributes
+    Creating methods in a class
+    Learning about Inheritance
+    Learning about Polymorphism
+    Learning about Special Methods for classes
+
+⇒ Object -: everything is an object. we can use type() to check the type of object something is
+print(type(1))
+print(type([]))
+print(type(()))
+print(type({}))
+
+⇒ Class-: User defined objects are created using the class keyword. The class is a blueprint that defines the nature of a future object. From classes we can construct instances. An instance is a specific object created from a particular class. 
+⇒ For example, above we created the object lst which was an instance of a list object
+
+class Sample:
+    pass
+x = Sample()
+print(type(x))
+
+⇒ An attribute is a characteristic of an object.
+⇒ A method is an operation we can perform with the object.
+
+class Dog:
+    def __init__(self,breed):
+        self.breed = breed
+sam = Dog(breed='Lab')
+frank = Dog(breed='Huskie')
+print(sam.breed)
+
+Lets break down what we have above.The special method 
+⇒  __init__() is called automatically right after the object has been created:
+⇒  def __init__(self, breed): Each attribute in a  class definition begins with a reference to the instance object. It is  by convention named self. 
+⇒ The breed is the argument. The value is passed  during the class instantiation.
+ self.breed = breed
+
+⇒ Methods-: Methods are functions defined inside the body of a class. They are used to perform operations with the attributes of our objects. Methods are a key concept of the OOP paradigm. They are essential to dividing responsibilities in programming, especially in large applications.
+
+[Example]
+class Circle:
+    pi = 3.14
+    def __init__(self,radius=1):
+        self.radius = radius
+        self.area = radius * radius * Circle.pi 
+    def setRadius(self,r):
+        self.radius = r
+        self.area = r * r * Circle.pi
+    def getCircumference(self):
+        return self.radius * Circle.pi * 2
+                
+c = Circle()
+#c = Circle(radius=10)
+print(f" Radius: {c.radius}\n Area: {c.area}\n Circumference: {c.getCircumference()} ")
+
+⇒ Inheritance-: Inheritance is a way to form new classes using classes that have already been defined. The newly formed classes are called derived classes, the classes that we derive from are called base classes. Important benefits of inheritance are code reuse and reduction of complexity of a program. The derived classes (descendants) override or extend the functionality of base classes (ancestors)
+
+class Animal:
+    def __init__(self):
+        print("Animal Created")
+    def whoAmI(self):
+        print("Animal")
+    def eat(self):
+        print("Eating")        
+
+class Dog(Animal):
+    def __init__(self):
+        Animal.__init__(self)
+        print("Dog Created")
+    def whoAmI(self):
+        print("Dog")
+    def speak(self):
+        print("Woof!")
+d = Dog()
+print(f" {d.whoAmI()} \n {d.eat()} ")
+
+⇒ Polymorphism-: Functions can take in different arguments, methods belong to the objects they act on. In Python, polymorphism refers to the way in which different object classes can share the same method name, and those methods can be called from the same place even though a variety of different objects might be passed in.
+⇒ Example-:
+class Dog:
+    def __init__(self,name):
+        self.name = name
+    def speak(self):
+        return self.name+" Says Woof!"        
+class Cat:
+    def __init__(self,name):
+        self.name = name
+    def speak(self):
+        return self.name+" Says Meow!"
+niko = Dog('Niko')
+felix = Cat('Felix')
+for i in [niko,felix]: print(i.speak())
+
+⇒ Special Methods-: __str__ : __len__
+class Book:
+    def __init__(self,name,author,pages):
+        self.name = name
+        self.author = author
+        self.pages = pages
+    def __str__(self):
+        return f"{self.name} by {self.author}"
+    def __len__(self):
+        return self.pages
+b = Book('A BookName','AuthorName',300)
+print(b) ;  #calls for string
+print(str(b)) ; print(len(b))
+
+********************************************************************************************************
+[OS]
+https://docs.python.org/3/library/os.html
+https://docs.python.org/3/library/sys.html
+
+open()
+.path  ⇒ path manipulation
+.fileinput ⇒ Read All lines from all files
+.tempfile ⇒ creating a temp file
+.shutil ⇒ High-Level file & Directory Handling
+
+[On VxWorks, os.fork, os.execv and os.spawn*p* not supported]
+
+[File And Directory Handling]
+Python Descryptor 
+        1. File(fd) 
+        2. Directory(dir_fd) 
+        3. follow_symlinks(follow_symlinks)
+print(f"Descryptor\n [File]: {os.supports_fd}\n [Directory] {os.supports_dir_fd}\n follow_symlinks-: {os.supports_follow_symlinks} ")
+
+os.chdir(path)
+os.fchdir(fd)   ??? important
+os.getcwd()
+os.geteuid() ⇒ current process's user id.
+os.getegid() ⇒ Return the effective gid of current process
+os.getgid() ⇒ Real group id of current process.
+
+# {os.chdir('/')} \n {os.listdir()\n {os.utime('/root/Desktop/passlist.txt')}
+#print(f"Descryptor\n [File]: {os.supports_fd}\n [Directory] {os.supports_dir_fd}\n follow_symlinks-: {os.supports_follow_symlinks} ")
+#print(f" {os.fsencode('/root/Desktop/file.txt')} \n{os.fsdecode('/root/Desktop/file.txt')}")
+#print(os.get_exec_path()) # return execuatble paths
+print(f"UID:{os.geteuid()} \t GID:{os.getegid()} \n {os.getgrouplist('mitsuo',1000)}\n {os.getgroups()} \n {os.getlogin()}")
+
+#import sys ; print(f" {sys.platform}\n {sys.getfilesystemencoding()}")
+#import socket ; print(f"{socket.getaddrinfo('localhost', 8888)}")
+
+********************************************************************************************************
+[python scripts]
+python3 -c "import os; os.system('ls'+' -l')"
+python3 -c "import subprocess; subprocess.run(['ls','-l','/tmp'])"
+python3 -c "import pty ; pty.spawn('/bin/sh')"
+
+LNW# cat 01.py
+#!/usr/bin/env python3
+import sys
+import os
+print(sys.platform)
+a='Hello'
+b='Rohit'
+print("{0} {1}".format(a,b))
+print(f"{os.getuid()} {os.getegid()} \n {os.uname()}")
+
+LNW# cat 02.py
+#!/usr/bin/env python3
+import sys
+#s=input("Input a String - ")
+#n=int(input("Input a number - "))
+#print("s= {0}\nn= {1}".format(s,n))
+
+s1 = sys.argv[1]
+while True:
+    try:
+        n1 = int(input("some num: "))
+    except:
+        print("Not a number, Retry!!!")
+    else:
+        break;
+print("s= {0}\nn= {1}".format(s1,n1))
+
+LNW# cat 03.py
+#!/usr/bin/env python3
+import sys
+vpass='secret'
+ipass=input("input secret pass - ")
+if ipass==vpass:
+    print("Sucess!")
+else:
+    print("Better Luck Next time..")
+    sys.exit(0)
+print("Welcome..")
+
+LNW# cat 04.py 
+#!/usr/bin/env python3
+import sys
+if len(sys.argv) > 1:
+    s = sys.argv[1]
+else:
+    s = input("input string: ")
+if len(sys.argv) > 2:
+    n = int(sys.argv[2])
+else:
+    n =int(input('input num: '))
+print("{0:7} : {1:<8}".format('String',s))
+print("{0:7} : {1:<8}".format('Num',n))
+# < Left ; > Right ; ^ Center
+
+# cat 05.py 
+#!/usr/bin/env python3
+#print('dog' in 'A Dog ran away'.lower())
+
+def myfunc1(*args):
+    print(args)
+    #for i in args:print(i)
+myfunc1('a','b',1,3,54,76)
+
+def myfunc2(**kwargs):
+    '''
+    Docstring: Information
+    input: some argument
+    output: printing
+    '''
+    print(kwargs)
+    if 'fruit' in kwargs:
+        print("My choice {} ".format(kwargs['fruit']))
+    else:
+        print('Match Not Found')
+#help(myfunc2)
+#myfunc2(fruit='apple',b='banana',c='chickoo')
+
+def my_func(*args,**kwargs):
+    print(args)
+    print(kwargs)
+    print("I like to have {} {}.".format(args[0],kwargs['bird']))
+my_func(20,30,animal='dog',fruit='apple',food='eggs',bird='sparrow')
+
+# cat 06.py 
+#!/usr/bin/env python3
+import time
+count=0
+while True:
+    count+=1
+    time.sleep(1)
+    print("loop count for time: ",count,"second...")
+    if count == 5:
+        break;
+    
+# cat 07.py 
+#!/usr/bin/env python3
+import random
+r = random.randint(1,5)
+num=0
+while True:
+    num=int(input("input a number: "))
+    if num == r:
+        print("Correct Guess")
+        break;
+    else:
+        print("Retry...")
+        continue
+
+# cat 08.py
+#!/usr/bin/env python3
+import sys
+def num_fact(n):
+    '''
+    Docstring: Number Factorial
+    input: provide any Natural number
+    output: provide factorial of given number
+    '''
+    if n>1:
+        return n * num_fact(n-1)
+    else:
+        return 1
+#print("Factorial of number is {}".format(num_fact(5)))
+print("Factorial of number is {}".format(num_fact(int(sys.argv[1]))))
+
+********************************************************************************************************
+[I/O Files]
+with open('myfile.txt') as my_new_file:
+     contents = my_new_file.read()
+print(contents)
+
+********************************************************************************************************
+
+
+
+
+
+
+********************************************************************************************************
