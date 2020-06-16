@@ -21,3 +21,201 @@ U = user ;; d = database ;; p = port ;; h = hostserver ip ;; W = Prompt fro pass
 # psql -U mydbuser -d mydb -h 127.0.0.1 -p 5432 -W
 -----------------------------------------------------
 https://stackoverflow.com/questions/2942485/psql-fatal-ident-authentication-failed-for-user-postgres#11545725
+
+
+
+[Psql  - size of Table, Database, Indexes, Tablespace]
+--------------------------------------------------------
+1. Output in bytes
+# SELECT pg_relation_size('session')                  {To get the size of a specific table} 
+# SELECT pg_total_relation_size('session')        {To get the total size of a table} 
+
+2. Result in human redable like MB,GB,TB 
+# SELECT pg_size_pretty ( pg_relation_size('session')) 
+# SELECT pg_size_pretty ( pg_total_relation_size('session')) 
+
+3. Top 5 table sorted by size. 
+# SELECT relname AS "relation", pg_size_pretty (pg_total_relation_size (C .oid)) AS "total_size"
+FROM pg_class C LEFT JOIN pg_namespace N ON (N.oid = C .relnamespace) 
+WHERE nspname NOT IN ('pg_catalog','information_schema') AND C .relkind <> 'i' AND nspname !~ '^pg_toast' 
+ORDER BY pg_total_relation_size (C .oid) DESC LIMIT 5; 
+
+4.Database size 
+# select pg_size_prerty( pg_database_size('dbname')); 
+
+5. Database size of database in current server. 
+# SELECT pg_database.datname,pg_size_pretty(pg_database_size(pg_database.datname)) AS size FROM pg_database; 
+
+6. index size 
+# SELECT pg_size_pretty (pg_indexes_size('actor')); 
+
+7. Tablespace size 
+# SELECT pg_size_pretty (pg_tablespace_size ('pg_default')); 
+
+8. To find how much space that needs to store a specific value 
+# select pg_column_size(5::smallint); 
+# select pg_column_size(5::int); 
+# select pg_column_size(5::bigint); 
+
+reference -: 
+http://www.postgresqltutorial.com/postgresql-database-indexes-table-size/
+
+https://www.postgresql.org/docs/10/monitoring-stats.html 
+https://www.postgresql.org/docs/10/admin.html 
+https://www.postgresql.org/docs/10/sql-explain.html 
+https://www.postgresql.org/docs/9.5/backup-dump.html 
+=================================================================== 
+
+
+
+
+[Backup] [Restore] 
+
+# pg_dump dbname > dumpfile 
+# psql dbname < dumpfile 
+# pg_dumpall > dumpfile1 
+# psql -f dumpfile1 postgres 
+
+[dump database from one database to another] 
+# pg_dump -h host1 dbname | psql -h host2 dbname 
+
+[Handling Large Database] 
+# pg_dump dbname | gzip > filename.gz 
+# gunzip -c filename.gz | psql dbname 
+# cat filename.gz | gunzip | psql dbname 
+
+=====[split]===(command allows you to split the output into smaller files)====== 
+pg_dump dbname | split -b 1m - filename 
+cat filename* | psql dbname 
+
+[Custom dump Format] 
+pg_dump -Fc dbname > filename 
+pg_restore -d dbname filename 
+
+[Parallel dump feature] 
+pg_dump -j num -F d -f out.dir dbname 
+
+======== [pg_locks] ========================== 
+SELECT * FROM pg_locks pl LEFT JOIN pg_stat_activity psa  ON pl.pid = psa.procpid; 
+copy( <-----> ) to '/tmp/filename.csv' with csv header; 
+
+=====================[ Dynamic Staticstics View ]========================================= 
+1. pg_stat_activity -: One row per server process, showing information related to the current activity of that process, such as state and current query. See pg_stat_activity for details. 
+2. pg_stat_replication -: One row per WAL sender process, showing statistics about replication to that sender's connected standby server. See pg_stat_replication for details. 
+3. pg_stat_wal_receiver -: Only one row, showing statistics about the WAL receiver from that receiver's connected server. See pg_stat_wal_receiver for details. 
+4. pg_stat_subscription -: At least one row per subscription, showing information about the subscription workers. See pg_stat_subscription for details. 
+5. pg_stat_ssl -: One row per connection (regular and replication), showing information about SSL used on this connection. See pg_stat_ssl for details. 
+6. pg_stat_progress_vacuum -: One row for each backend (including autovacuum worker processes) running VACUUM, showing current progress. See Section 28.4.1. 
+
+========================== [Backup] ============================= 
+#!/bin/sh" 
+# directory to backup 
+BDIR=/path/dbbackup 
+BFILE=$BDIR/`date +%A`.bak 
+rm -f $BFILE* 
+/usr/bin/pg_dump -o -c -U postgres radius | split -d -b 1536m -a 10 -  $BFILE. 
+*********************************************************************************************************************
+
+
+[Psql - Administration ]
+uptime, 
+Ps 
+===================================================================================== 
+To monitor the DB: 
+# select now()-query_start as runtime,procpid,current_query from pg_stat_activity where not current_query like '%IDLE%' order by 1;  
+(show existing query running) 
+
+For PG9.2 and above 
+# select now()-query_start as runtime,pid,query from pg_stat_activity where state<>'idle' order by 1; 
+
+-------->>>>>for killing any process : use only 
+# kill -3 <pid> 
+***************************************************************************** 
+# select now()-query_start as runtime,client_addr,pid,state,query from pg_stat_activity where not upper(state) like '%IDLE%' order by 1; 
+
+kill sessions
+#  /usr/bin/psql -U radius -c "begin;delete from session where state='W' and now()-start>'00:12:00';update  session set state='C',closereason=1 where state='A' and now()-lastupd>'00:12:00';end;" 
+===================================================================================== 
+# SELECT pg_size_pretty ( pg_total_relation_size('session')); 
+# cat /var/lib/pgsql/9.1/data/pg_log/postgresql-Tue.log 
+# cat /var/lib/pgsql/9.1/data/pg_log/postgresql.conf 
+============================================================================== 
+echo -e "current_sessions\n"|nc 127.0.0.1 30000 
+tcpdump -vv -s0 -n -i  eth1 pppoes    {complete Dump} 
+find . -type -d -name '201707*' -exec rm -rf {} \; 
+find . -type d -name '201611*' -exec rm -rf {} \; > /dev/null 2>&1  
+find . -name 'f*' -print0 | xargs -0 -I {} mv {} /home/test/tst/ 
+find . -iname 'f*' -exec mv '{}' /home/test/ \; 
+#find /var/walfiles/ -type f -mtime +9 -exec rm -rf {} \; 
+
+#################DB Load and authentication problem################## 
+Kindly follow the below steps to verify the DB load issue and authentication problem. 
+step 1   # select count(*) from session where state='C'; 
+         < if record is  more than  2000 then do below step else do nothing.> 
+step 2 :>  select sesno from sessionhistory where sesno in (select sesno from session where state='C'); 
+           <if there is an output , keep it noted, > 
+step 3.>   select now()-query_start as runtime,client_addr,pid,state,query from pg_stat_activity where not upper(state) like '%IDLE%' order by 1; 
+           <check if "sessionhistory_move" process is showing in output of above query (step-3) then  kill this process> 
+step 4>  update session set sesno=nextval(('public.session_sesno_seq'::text)::regclass) where sesno=<?>; 
+Replace ?    < with Output of first step 2 without <> > 
+step 5>  Run step -3 query again and check if "sessionhistory_move" process should show, if not then wait for 5-10 min. and check again. 
+step 6> select count(*) from session where state='C';  
+          < if record number comes down from fist step then fellow step -7 else repeat the steps 1 to 6 again.>  
+
+step 7 >  /usr/bin/TableReindex.sh from crontab 
+=====================================================================================
+
+
+
+[SQL - Administration ]
+[User Manage] 
+# CREATE USER 'newuser'@'localhost' IDENTIFIED BY 'password';    {user Created} 
+# GRANT ALL PRIVILEGES ON * . * TO 'newuser'@'localhost';    {grant role} 
+# FLUSH PRIVILEGES;   {reload table} 
+====================================================================== 
+SELECT table_schema,table_name,round(((data_length + index_length) / 1024 / 1024), 2) FROM information_schema.TABLES ORDER BY (data_length + index_length) DESC ; 
+SELECT table_schema,table_name,(data_length + index_length)  FROM information_schema.TABLES ORDER BY 1 DESC ; 
+====================================================================== 
+[Backup of MySqlDatabase] 
+mysqldump -uroot --add-drop-database --compact -B radius > radius.sql 
+$ mysqldump -u [uname] -p[pass] db_name > db_backup.sql 
+$ mysqldump -u [uname] -p[pass] --all-databases > all_db_backup.sql 
+$ mysqldump -u [uname] -p[pass] db_name table1 table2 > table_backup.sql 
+
+You can even go as far as auto-compressing the output using gzip (if your DB is very big): 
+$ mysqldump -u [uname] -p[pass] db_name | gzip > db_backup.sql.gz 
+$ mysqldump -P 3306 -h [ip_address] -u [uname] -p[pass] db_name > db_backup.sql 
+mysqladmin -u root -p version 
+mysqladmin -u root -p ping 
+mysqladmin -u root -p status
+mysqladmin -u root -p extended-status 
+mysqladmin -u root -p processlist 
+mysqladmin -u root -p variable 
+mysqladmin -u root -ppass123 password 'xyz123' 
+
+[reload/refresh MySQL Privileges] 
+# mysqladmin -u root -p reload; 
+# mysqladmin -u root -p refresh 
+
+[Some useful MySQL Flush commands] 
+1. flush-hosts: Flush all host information from host cache.  
+2. flush-tables: Flush all tables. 
+3. flush-threads: Flush all threads cache. 
+4. flush-logs: Flush all information logs. 
+5. flush-privileges: Reload the grant tables (same as reload). 
+6. flush-status: Clear status variables. 
+# mysqladmin -u root -p flush-hosts 
+
+[Kill any process ID ] 
+mysqladmin -u root -p processlis 
+mysqladmin -u root -p kill <ID> 
+
+[multiple command at same time] 
+mysqladmin -u root -p processlis status version 
+
+[connect or check network SQL] 
+mysqladmin -h 192.168.100.10 -u root -p status 
+
+[start replication on a slave server] 
+# mysqladmin -u root -p start-slave 
+# mysqladmin -u root -p stop-slave 
