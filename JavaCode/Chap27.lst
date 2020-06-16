@@ -1,0 +1,555 @@
+listing 1
+// Use the new I/O system to read a text file. 
+import java.io.*; 
+import java.nio.*; 
+import java.nio.channels.*; 
+ 
+public class ExplicitChannelRead { 
+  public static void main(String args[]) { 
+    FileInputStream fIn; 
+    FileChannel fChan; 
+    long fSize; 
+    ByteBuffer mBuf; 
+ 
+    try { 
+      // First, open an file for input. 
+      fIn = new FileInputStream("test.txt"); 
+ 
+      // Next, obtain a channel to that file. 
+      fChan = fIn.getChannel(); 
+ 
+      // Now, get the file's size. 
+      fSize = fChan.size(); 
+ 
+      // Allocate a buffer of the necessary size. 
+      mBuf = ByteBuffer.allocate((int)fSize); 
+ 
+      // Read the file into the buffer. 
+      fChan.read(mBuf); 
+       
+      // Rewind the buffer so that it can be read. 
+      mBuf.rewind(); 
+ 
+      // Read bytes from the buffer. 
+      for(int i=0; i < fSize; i++) 
+        System.out.print((char)mBuf.get()); 
+ 
+      System.out.println(); 
+ 
+      fChan.close(); // close channel 
+      fIn.close();   // close file 
+    } catch (IOException exc) { 
+      System.out.println(exc); 
+      System.exit(1); 
+    } 
+  } 
+}
+
+listing 2
+// Use a mnapped file to read a text file. 
+import java.io.*; 
+import java.nio.*; 
+import java.nio.channels.*; 
+ 
+public class MappedChannelRead { 
+  public static void main(String args[]) { 
+    FileInputStream fIn; 
+    FileChannel fChan; 
+    long fSize; 
+    MappedByteBuffer mBuf; 
+ 
+    try { 
+      // First, open an file for input. 
+      fIn = new FileInputStream("test.txt"); 
+ 
+      // Next, obtain a channel to that file. 
+      fChan = fIn.getChannel(); 
+ 
+      // Get the size of the file. 
+      fSize = fChan.size(); 
+ 
+      // Now, map the file into a buffer. 
+      mBuf = fChan.map(FileChannel.MapMode.READ_ONLY, 
+                       0, fSize); 
+ 
+      // Read bytes from the buffer. 
+      for(int i=0; i < fSize; i++) 
+        System.out.print((char)mBuf.get()); 
+ 
+      fChan.close(); // close channel 
+      fIn.close();   // close file 
+    } catch (IOException exc) { 
+      System.out.println(exc); 
+      System.exit(1); 
+    } 
+  } 
+}
+
+listing 3
+// Write to a file using the new I/O. 
+import java.io.*; 
+import java.nio.*; 
+import java.nio.channels.*; 
+ 
+public class ExplicitChannelWrite { 
+  public static void main(String args[]) { 
+    FileOutputStream fOut; 
+    FileChannel fChan; 
+    ByteBuffer mBuf; 
+ 
+    try { 
+      fOut = new FileOutputStream("test.txt"); 
+ 
+      // Get a channel to the output file. 
+      fChan = fOut.getChannel(); 
+ 
+      // Create a buffer. 
+      mBuf = ByteBuffer.allocateDirect(26); 
+ 
+      // Write some bytes to the buffer. 
+      for(int i=0; i<26; i++)  
+        mBuf.put((byte)('A' + i)); 
+ 
+      // Rewind the buffer so that it can written. 
+      mBuf.rewind(); 
+ 
+      // Write the buffer to the output file. 
+      fChan.write(mBuf); 
+ 
+      // close channel and file. 
+      fChan.close(); 
+      fOut.close(); 
+    } catch (IOException exc) { 
+      System.out.println(exc); 
+      System.exit(1); 
+    } 
+  } 
+}
+
+listing 4
+// Write to a mapped file. 
+import java.io.*; 
+import java.nio.*; 
+import java.nio.channels.*; 
+ 
+public class MappedChannelWrite { 
+  public static void main(String args[]) { 
+    RandomAccessFile fOut; 
+    FileChannel fChan; 
+    ByteBuffer mBuf; 
+ 
+    try { 
+      fOut = new RandomAccessFile("test.txt", "rw"); 
+ 
+      // Next, obtain a channel to that file. 
+      fChan = fOut.getChannel(); 
+ 
+      // Then, map the file into a buffer. 
+      mBuf = fChan.map(FileChannel.MapMode.READ_WRITE, 
+                       0, 26); 
+ 
+      // Write some bytes to the buffer. 
+      for(int i=0; i<26; i++)  
+        mBuf.put((byte)('A' + i)); 
+ 
+      // close channel and file. 
+      fChan.close(); 
+      fOut.close(); 
+    } catch (IOException exc) { 
+      System.out.println(exc); 
+      System.exit(1); 
+    } 
+  } 
+}
+
+listing 5
+// Copy a file using NIO. 
+import java.io.*; 
+import java.nio.*; 
+import java.nio.channels.*; 
+ 
+public class NIOCopy { 
+ 
+  public static void main(String args[]) { 
+    FileInputStream fIn; 
+    FileOutputStream fOut; 
+    FileChannel fIChan, fOChan; 
+    long fSize; 
+    MappedByteBuffer mBuf; 
+ 
+    try { 
+      fIn = new FileInputStream(args[0]); 
+      fOut = new FileOutputStream(args[1]); 
+ 
+      // Get channels to the input and output files. 
+      fIChan = fIn.getChannel(); 
+      fOChan = fOut.getChannel(); 
+ 
+      // Get the size of the file. 
+      fSize = fIChan.size(); 
+ 
+      // Map the input file to a buffer. 
+      mBuf = fIChan.map(FileChannel.MapMode.READ_ONLY, 
+                        0, fSize); 
+ 
+      // Write the buffer to the output file. 
+      fOChan.write(mBuf); // this copies the file 
+ 
+      // Close the channels and files. 
+      fIChan.close(); 
+      fIn.close(); 
+ 
+      fOChan.close(); 
+      fOut.close(); 
+    } catch (IOException exc) { 
+      System.out.println(exc); 
+      System.exit(1); 
+    } catch (ArrayIndexOutOfBoundsException exc) {       
+      System.out.println("Usage: Copy from to"); 
+      System.exit(1); 
+    } 
+  } 
+}
+
+listing 6
+// A simple pattern matching demo. 
+import java.util.regex.*; 
+ 
+class RegExpr { 
+  public static void main(String args[]) { 
+    Pattern pat; 
+    Matcher mat; 
+    boolean found; 
+ 
+    pat = Pattern.compile("Java"); 
+    mat = pat.matcher("Java"); 
+ 
+    found = mat.matches(); // check for a match 
+ 
+    System.out.println("Testing Java against Java."); 
+    if(found) System.out.println("Matches"); 
+    else System.out.println("No Match"); 
+ 
+    System.out.println(); 
+ 
+    System.out.println("Testing Java against Java SE 6."); 
+    mat = pat.matcher("Java SE 6"); // create a new matcher 
+ 
+    found = mat.matches(); // check for a match 
+ 
+    if(found) System.out.println("Matches"); 
+    else System.out.println("No Match"); 
+  } 
+}
+
+listing 7
+// Use find() to find a subsequence. 
+import java.util.regex.*; 
+ 
+class RegExpr2 { 
+  public static void main(String args[]) { 
+    Pattern pat = Pattern.compile("Java"); 
+    Matcher mat = pat.matcher("Java SE 6"); 
+ 
+    System.out.println("Looking for Java in Java SE 6."); 
+ 
+    if(mat.find()) System.out.println("subsequence found"); 
+    else System.out.println("No Match"); 
+  } 
+}
+
+listing 8
+// Use find() to find multiple subsequences. 
+import java.util.regex.*; 
+ 
+class RegExpr3 { 
+  public static void main(String args[]) { 
+    Pattern pat = Pattern.compile("test"); 
+    Matcher mat = pat.matcher("test 1 2 3 test"); 
+ 
+    while(mat.find()) { 
+      System.out.println("test found at index " + 
+                         mat.start()); 
+    } 
+  } 
+}
+
+listing 9
+// Use a quantifier. 
+import java.util.regex.*; 
+ 
+class RegExpr4 { 
+  public static void main(String args[]) { 
+    Pattern pat = Pattern.compile("W+"); 
+    Matcher mat = pat.matcher("W WW WWW"); 
+ 
+    while(mat.find()) 
+      System.out.println("Match: " + mat.group());  
+  } 
+}
+
+listing 10
+// Use wildcard and quantifier. 
+import java.util.regex.*; 
+ 
+class RegExpr5 { 
+  public static void main(String args[]) { 
+    Pattern pat = Pattern.compile("e.+d"); 
+    Matcher mat = pat.matcher("extend cup end table"); 
+ 
+    while(mat.find()) 
+      System.out.println("Match: " + mat.group());  
+  } 
+}
+
+listing 11
+// Use the ? quantifier. 
+import java.util.regex.*; 
+ 
+class RegExpr6 { 
+  public static void main(String args[]) { 
+    // Use reluctant matching behavoir. 
+    Pattern pat = Pattern.compile("e.+?d"); 
+    Matcher mat = pat.matcher("extend cup end table"); 
+ 
+    while(mat.find()) 
+      System.out.println("Match: " + mat.group());  
+  } 
+}
+
+listing 12
+// Use a character class. 
+import java.util.regex.*; 
+ 
+class RegExpr7 { 
+  public static void main(String args[]) { 
+    // Match lowercase words. 
+    Pattern pat = Pattern.compile("[a-z]+"); 
+    Matcher mat = pat.matcher("this is a test."); 
+ 
+    while(mat.find()) 
+      System.out.println("Match: " + mat.group());  
+  } 
+}
+
+listing 13
+// Use replaceAll(). 
+import java.util.regex.*; 
+ 
+class RegExpr8 { 
+  public static void main(String args[]) { 
+    String str = "Jon Jonathan Frank Ken Todd"; 
+ 
+    Pattern pat = Pattern.compile("Jon.*? "); 
+    Matcher mat = pat.matcher(str); 
+ 
+    System.out.println("Original sequence: " + str); 
+ 
+    str = mat.replaceAll("Eric "); 
+ 
+    System.out.println("Modified sequence: " + str); 
+ 
+  } 
+}
+
+listing 14
+// Use split(). 
+import java.util.regex.*; 
+ 
+class RegExpr9 { 
+  public static void main(String args[]) { 
+ 
+    // Match lowercase words. 
+    Pattern pat = Pattern.compile("[ ,.!]"); 
+ 
+    String strs[] = pat.split("one two,alpha9 12!done."); 
+ 
+    for(int i=0; i < strs.length; i++) 
+      System.out.println("Next token: " + strs[i]); 
+ 
+  } 
+}
+
+listing 15
+// Demonstrate reflection.
+import java.lang.reflect.*;
+public class ReflectionDemo1 {
+  public static void main(String args[]) {
+    try {
+      Class c = Class.forName("java.awt.Dimension");
+      System.out.println("Constructors:");
+      Constructor constructors[] = c.getConstructors();
+      for(int i = 0; i < constructors.length; i++) {
+        System.out.println(" " + constructors[i]);
+      }
+
+      System.out.println("Fields:");
+      Field fields[] = c.getFields();
+      for(int i = 0; i < fields.length; i++) {
+        System.out.println(" " + fields[i]);
+      }
+
+      System.out.println("Methods:");
+      Method methods[] = c.getMethods();
+      for(int i = 0; i < methods.length; i++) {
+        System.out.println(" " + methods[i]);
+      }
+    }
+    catch(Exception e) {
+      System.out.println("Exception: " + e);
+    }
+  }
+}
+
+listing 16
+// Show public methods.
+import java.lang.reflect.*;
+public class ReflectionDemo2 {
+  public static void main(String args[]) {
+    try {
+      A a = new A();
+      Class c = a.getClass();
+      System.out.println("Public Methods:");
+      Method methods[] = c.getDeclaredMethods();
+      for(int i = 0; i < methods.length; i++) {
+        int modifiers = methods[i].getModifiers();
+        if(Modifier.isPublic(modifiers)) {
+          System.out.println(" " + methods[i].getName());
+        }
+      }
+    }
+    catch(Exception e) {
+      System.out.println("Exception: " + e);
+    }
+  }
+}
+
+class A {
+  public void a1() {
+  }
+  public void a2() {
+  }
+  protected void a3() {
+  }
+  private void a4() {
+  }
+}
+
+listing 17
+import java.rmi.*;
+public interface AddServerIntf extends Remote {
+  double add(double d1, double d2) throws RemoteException;
+}
+
+listing 18
+import java.rmi.*;
+import java.rmi.server.*;
+public class AddServerImpl extends UnicastRemoteObject
+  implements AddServerIntf {
+
+  public AddServerImpl() throws RemoteException {
+  }
+  public double add(double d1, double d2) throws RemoteException {
+    return d1 + d2;
+  }
+}
+
+listing 19
+import java.net.*;
+import java.rmi.*;
+public class AddServer {
+  public static void main(String args[]) {
+    try {
+      AddServerImpl addServerImpl = new AddServerImpl();
+      Naming.rebind("AddServer", addServerImpl);
+    }
+    catch(Exception e) {
+      System.out.println("Exception: " + e);
+    }
+  }
+}
+
+listing 20
+import java.rmi.*;
+public class AddClient {
+  public static void main(String args[]) {
+    try {
+      String addServerURL = "rmi://" + args[0] + "/AddServer";
+      AddServerIntf addServerIntf =
+                    (AddServerIntf)Naming.lookup(addServerURL);
+      System.out.println("The first number is: " + args[1]);
+      double d1 = Double.valueOf(args[1]).doubleValue();
+      System.out.println("The second number is: " + args[2]);
+
+      double d2 = Double.valueOf(args[2]).doubleValue();
+      System.out.println("The sum is: " + addServerIntf.add(d1, d2));
+    }
+    catch(Exception e) {
+      System.out.println("Exception: " + e);
+    }
+  }
+}
+
+listing 21
+// Demonstrate date formats.
+import java.text.*;
+import java.util.*;
+
+public class DateFormatDemo {
+  public static void main(String args[]) {
+    Date date = new Date();
+    DateFormat df;
+
+    df = DateFormat.getDateInstance(DateFormat.SHORT, Locale.JAPAN);
+    System.out.println("Japan: " + df.format(date));
+
+    df = DateFormat.getDateInstance(DateFormat.MEDIUM, Locale.KOREA);
+    System.out.println("Korea: " + df.format(date));
+
+    df = DateFormat.getDateInstance(DateFormat.LONG, Locale.UK);
+    System.out.println("United Kingdom: " + df.format(date));
+
+    df = DateFormat.getDateInstance(DateFormat.FULL, Locale.US);
+    System.out.println("United States: " + df.format(date));
+  }
+}
+
+listing 22
+// Demonstrate time formats.
+import java.text.*;
+import java.util.*;
+public class TimeFormatDemo {
+  public static void main(String args[]) {
+    Date date = new Date();
+    DateFormat df;
+
+    df = DateFormat.getTimeInstance(DateFormat.SHORT, Locale.JAPAN);
+    System.out.println("Japan: " + df.format(date));
+
+    df = DateFormat.getTimeInstance(DateFormat.LONG, Locale.UK);
+    System.out.println("United Kingdom: " + df.format(date));
+
+    df = DateFormat.getTimeInstance(DateFormat.FULL, Locale.CANADA);
+    System.out.println("Canada: " + df.format(date));
+  }
+}
+
+listing 23
+// Demonstrate SimpleDateFormat.
+import java.text.*;
+import java.util.*;
+
+public class SimpleDateFormatDemo {
+  public static void main(String args[]) {
+    Date date = new Date();
+    SimpleDateFormat sdf;
+    sdf = new SimpleDateFormat("hh:mm:ss");
+    System.out.println(sdf.format(date));
+    sdf = new SimpleDateFormat("dd MMM yyyy hh:mm:ss zzz");
+    System.out.println(sdf.format(date));
+    sdf = new SimpleDateFormat("E MMM dd yyyy");
+    System.out.println(sdf.format(date));
+  }
+}
+
+
