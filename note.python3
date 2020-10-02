@@ -496,12 +496,67 @@ print("Factorial of number is {}".format(num_fact(int(sys.argv[1]))))
 with open('myfile.txt') as my_new_file:
      contents = my_new_file.read()
 print(contents)
-
 ********************************************************************************************************
 
 
-
-
-
-
 ********************************************************************************************************
+Arithmetic operators
+Assignment operators
+Comparison operators	(==,!=,>,<,>=,<=)
+Logical operators 	( and, or, not)
+Identity operators	( "x" is y, x is not y)
+Membership operators	( "x" in y, x not in y)
+Bitwise operators
+
+(x>3 and x<10)
+(x>3 or x<10)
+(not(x>3 and x<10))
+(not(x>3 or x<10))
+
+======= LIST ===========collections (Arrays)
+List []	=> is a collection which is ordered and changeable. Allows duplicate members.
+Set {}	=> is a collection which is ordered and unindexed. No duplicate members.
+
+Tuple ()	=> is a collection which is unordered and unchangeable. Allows duplicate members.
+Dictionary {(x1,y1),(x2,y2)} => is a collection which is unordered, changeable and indexed. No duplicate members.
+
+--[List]-----------------------------------------------------------------------------------------------
+a = [ 1, 2, 'a', 3] ;  a1 = [1,'a',3]  ;   a2 = [4,'b'] ; a3 = [7,'c',9]
+print(type(a)) ; mat = [a1,a2,a3]
+#for row in range(0,len(mat)):
+#    for col in range(0,len(mat[row])):  print(mat[row][col])
+for row in range(len(mat)): print(mat[row])
+
+l1 = [1,2,3] ;  l2 = ['a','b','c']
+list(zip(l1,l2))
+for i,j in zip(l1,l2): print("At {} is {}".format(i,j))
+
+--(Tuples)-----------------------------------------------------------------------------------------------
+b = ('a','b','c',1,'c',2) ; b1 = ('x','y','c','z')  ;  print(type(b))
+t = b + b1
+print(t)  ; print(t.count('c')) ; print(t.index('c'))
+
+--{Sets}-----------------------------------------------------------------------------------------------
+Note:- Basic use for Member testing and eliminating duplicate entries. Set object Also support Mathmatical operation like Uninion, Intersection, difference and symmetric difference.
+c = {1,2,2,3,'a','b','b'}
+l = [1,2,3,10,84,1,2,3,4,5,4,2,7,9]
+print(type(c))  	# show type
+print(set(l))   	# printing list into Set format
+print(tuple(l))        	# printing list into Tuples format
+c.add(5)  ;   print(c)  # add value into set but kept in unique
+c.clear()  ;  print(c)  # will display blank set
+
+s = set('abcdecdfg')  ;    s1 = set('acbxyz')
+print(s|s1) # Union : letter in s or s1 or in Both
+print(s&s1) # Intersection : letter in Both
+print(s-s1) # Difference : letter in s but not in s1
+print(s1-s) # Difference : letter in s1 but not in s
+print(s^s1) # letter in s or s1 But not in Both
+
+--{Dictionary}------------{Key:value}---------------------------------------------------------------------------
+d = {'k1':'v1','k2':'v2'}
+print(d) ; print(d.keys()) ; print(d.values()) ; print(d.items())
+
+for i,j in enumerate(d): print(f" {j} ==> {d[j]} ")
+for i in d: print(f" {i}--> {d[i]} ")
+print(d)
