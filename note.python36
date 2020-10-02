@@ -1,0 +1,993 @@
+git-scm.com
+github.com
+http://gitimmersion.com/
+
+Python Data Types
+
+[root@node1 python3]# cat string1.py 
+#!/bin/env python3.6
+x =  " Hello World ";
+print(x) ;
+x = x + ", This is a String";
+#print x ;
+#print x.lower();
+#print x.upper();
+#print x.split('i');
+
+# .format()
+#print('This is string {} '.format('Inserted'));
+#print('The {} {} {}'.format('quick','brown','fox'));
+#print('The {1} {2} {0}'.format('quick','brown','fox'));
+#print('The {f} {b} {q}'.format(q='quick',b='brown',f='fox'));
+
+#f-strings (formatted strings literals)
+# Float formatting follow "{value:width.precision f}"
+result = 104.123456789
+print(result);
+print("The result was {r:1.2f}".format(r=result));
+name = "Rohit";age=23;
+print(f'Hello, He is {name}'); 
+print(f"{name} is {age} year's of age.");
+
+[root@node1 python3]# cat string2.py 
+#!/bin/env python3.6
+print('hello');
+print("injecting %s here"%('something'));
+print("inject Two text:1- %s and 2-%s "%('text1','Two'));
+x,y='some','more';
+print("injecting %s more and %s texts"%(x,y));
+
+
+[root@node1 python3]# cat string.py 
+#!/bin/env python3.6
+n='Rohit';a=25;
+print(f'{n} is here');
+print(f'{n} is {a} of age.');
+print("%s is here"%('Rohit'))
+print("%s is %s of age "%(n,a));
+
+[root@node1 python3]# cat list1.py 
+#!/bin/env python3.6
+list1 = ['one','two','three'];
+print(list1);
+list1[0]= "Number"
+list1.append('Four')
+print(list1);
+pop1 = list1.pop()
+print(list1);
+print(pop1);
+list1.sort();
+print(type(list1));
+list2 = [2,4,3,6,9,1]
+list2.sort();
+print(list2)
+
+l1 = []
+l2 = ['a','b','c']
+print(l2)
+for i in l2 : l1.append(i)
+for i in l1 : print(i)
+
+Dict:- Dictionaries are unordered mapping for storing objects. Previously we saw how lists store objects in an ordered sequence dictionaries use a key-value pairing instead.
+This key:- value pair allow users to quickly grab objects without needing to know an index location.
+When to choose dictionary or lists ?
+Dictionary: Objects retrieved by key name. Unordered and can not be sorted.
+Lists: Objects retrieved by location. Ordered sequence can be indexed or sliced.
+
+[A quick note, Python has a built-in method of doing a self subtraction or addition (or multiplication or division). We could have also used += or -= for the above statement.]
+
+[root@node1 python3]# cat dict.py
+#!/bin/env python3.6
+#d={"name":"rohit","age":"25",'num':['1','2','3','4']}
+#print(d);
+#print(d['name'])
+#d['name']='Rohit Kumar'
+#print(d['name'])
+#print(d['num']);
+
+#di = {'key1':123,'key2':[12,23,33],'key3':['Item0','item1','item2']}
+#print(di['key3'][0].upper())
+#di['key1'] = di['key1'] - 100
+#print(di['key1'])
+
+d = {}
+d['k1'] = 'value1';
+d['k2'] = 'value2'
+print(d);
+print(d.keys());
+print(d.values());
+print(d.items());
+
+Tuples: tuples are very similar to lists. However they have one key difference- immutability. Once a element is inside tuples, it can’t be reassigned. Tuples are in parenthesis (1,2,3).
+
+[root@node1 python3]# cat tuple.py 
+#!/bin/env python36
+l = [1,2,3]
+print(type(l));
+t = (1,2,3)
+print(type(t));
+t1 = ('a','a',2,'one','b');
+print("count(a)-",t1.count('a'))
+print("index(b)-",t1.index('b'))
+print(len(t));
+
+l[0] = 'new'		## list can be assign new value, but not in tuples
+print(l)
+
+#t[0] = ('new')  ## gives error as tuples doesn’t support item assignment.
+
+
+Sets : Sets are unordered collection of unique elements. Meaning there can be only one reprentative of the same object.
+
+[root@node1 python3]# cat set1.py 
+#!/bin/env python36
+s1 = set()
+s1.add(1)
+s1.add(2)
+s1.add(1) ## sets have unique value so this will reappear
+print(s1)
+
+Boolean : are the operators that allow you to convey true or false statements. These are very important later on when we deal with control flow and logic! Like - True, False
+
+#!/bin/env python36
+print(True)
+print(False)
+print(1 > 2)
+print(type(1 == 1)) 		##<class 'bool'>
+
+b = None ##We can use None as a placeholder for an object that we don't want to reassign yet
+print(b)
+print(type(b)) 			##<class 'NoneType'>
+
+Files
+Python uses file objects to interact with external files on your computer. These file objects can be any sort of file you have on your computer, whether it be an audio file, a text file, emails, Excel documents, etc. Note: You will probably need to install certain libraries or modules to interact with those various file types, but they are easily available.
+
+%%writefile file.txt			## this will only works in jupiter-notebook.
+This is first line.
+This is second line.
+This is third line.
+
+file = open(‘file.txt’,mode=’r’)
+file.read()
+file.read()  	## prints ‘ ’ because counter reachs to end, and need to reset.
+file.seek(0)	## counter resets to zero.
+file.readlines()
+
+‘r’ :-readonly,
+‘w’ :-write only, 
+‘a’ :- append only,
+‘r+’ :- reading and writing, 
+‘w+’ :- writing and reading
+
+with open(‘file.txt’,mode=’r’) as f:
+print(f.read())
+
+with open(‘file.txt’,mode=’a’) as f:
+print(f.write(‘\nThis is appended’))
+
+with open(‘file.txt’,mode=’r’) as f:
+print(f.read())
+
+
+
+34_for Loops
+
+35_While loops
+
+40_Methods and the Python Documentation
+- Built-in objects in python have a variety of methods
+- https://docs.python.org/3/ 
+
+mylist.insert
+help(mylist.insert)	[returns docstring or documentation string]
+
+
+41_Functions in Python
+=> creating clean repeatable	code is key part of becoming an effective programmer.
+=> Function allow us to create blocks of code that can be easily executed many times, without needing to constantly rewrite the entire block of code.
+Def name_of_function():
+‘’’ 
+Docstring : explaination function
+‘’’
+Print(“hello”)
+
+>>> name_of_function()
+>>> hello
+
+Example 1-:
+[root@node1 python3]# cat function1.py 
+#!/bin/env python36
+n="Rohit";a=24
+def display_fun():
+	print(f"Good Morning. Mr. {n}")
+	print("%s is %s years of age"%(n,a))
+display_fun()
+[root@node1 python3]# ./function1.py 
+Good Morning. Mr. Rohit
+Rohit is 24 years of age
+
+Example 2-:
+rk@mint:~/test$ cat f1.py 
+#!/usr/bin/env python3
+def add(n1=1,n2=1):
+    return n1+n2;
+def diff(n3,n4):
+    return n3-n4;
+print(add(4,5))
+print(add())
+print(diff(10,2))
+
+#--------------- 2nd -----------
+def str_check(s):
+    if 'dog'  in s:
+        return True;
+    else:
+        return False;
+print(str_check('This dog is ran away'));
+print(str_check('hello'));
+print('dog' in 'Wrong');
+rk@mint:~/test$ ./f1.py 
+9
+2
+8
+True
+False
+False
+
+PIG LATIN
+If word stats with a vowel ,add ‘ay’ to end
+If word does not start with a vowel, put first letter at the end, then add ‘ay’
+Word --> ordway
+Apple --> appleay
+
+#!/usr/bin/python3
+def pig_latin(word):
+    first_lett = word[0]
+    if first_lett in 'aeiou':
+        pig_word = word + 'ay';
+    else:
+        pig_word = word[1:] + first_lett + 'ay'
+    return pig_word;
+
+print(pig_latin('world'))
+print(pig_latin('apple'))
+
+rk@mint:~/test$ ./f2.py 
+orldway
+appleay
+
+rk@mint:~/test$ cat f2.py 
+#!/usr/bin/env python3
+import sys
+def myfunc(a,b):
+    return sum((a,b)) * 0.05
+print(myfunc(30,70))   ## positional argument
+#--------------------------------------------#
+def myfunc2(*args):
+    return sum(args) * 0.05
+print(myfunc2(40,50))
+print(myfunc2(10,20,30))
+#print(myfunc2(32,33,35,33,4343))
+#--------------------------------------------#
+def myfunc3(*args):
+    for item in args:
+        print(item)
+myfunc3(10,20,300)
+#--------------------------------------------#
+def myfunc4(**kwargs):	##key-word argument
+    print(kwargs)
+    if 'fruit' in kwargs:
+        print('My fruit of choice is {}'.format(kwargs['fruit']))
+    else:
+        print("didn't find any fruit")
+myfunc4(fruit='apple',veggie='lettuce')
+#--------------------------------------------#
+def myfunc5(*args,**kwargs):
+    print(args)
+    print(kwargs)
+    print('i would like {} {}'.format(args[1],kwargs['food']))
+myfunc5(10,15,20,25,fruit='apple',food='cake',animal='dogs')
+rk@mint:~/test$ ./f2.py 
+5.0
+4.5
+3.0
+10
+20
+300
+{'fruit': 'apple', 'veggie': 'lettuce'}
+My fruit of choice is apple
+(10, 15, 20, 25)
+{'fruit': 'apple', 'food': 'cake', 'animal': 'dogs'}
+i would like 15 cake
+rk@mint:~/test$ 
+
+
+OOPS
+-----------------------------------------------------------------------------------
+class fruit():
+    def __init__(self):
+        print("Fruit Created")
+    def hi(self):
+        print("This is ""hi"" function defination")
+
+class Animal(fruit):
+    def __init__(self,name):
+        fruit.__init__(self)
+        self.name = name
+        print("Animal Class created")
+    def greet(self):
+        return f'{self.name} is here'       
+x = fruit()
+#x.__init__()
+x.hi()
+y= Animal('dog')
+y.hi()
+y.greet()
+------------------------------------------------------------------------------------
+class Book():
+    def __init__(self,title,author,pages):
+        self.title = title
+        self.author = author
+        self.pages = pages
+    
+    def __str__(self): # string type return
+        return f"{self.title} by {self.author}"
+    
+    def __len__(self): # length count return
+        return self.pages
+    
+    def __del__(self): # deleting object from run-time memory
+        print("The book object have deleted")
+b = Book('Python Rocks','Jose',200)
+print(b) ## return string
+str(b) ## return string
+len(b) ## return int
+del(b) ## erase from memory
+-----------------------------------------------------------------------------
+Bank Account Deposit & Withdraw :-
+======================
+class Account:
+    def __init__(self,owner,bal=0):
+        self.owner = owner
+        self.bal = bal
+        
+    def __str__(self):
+        return f'Account Owner : {self.owner} \n Account balance : ${self.bal}'
+    
+    def deposit(self, dp_amt):
+        self.bal += dp_amt
+        print(f'Deposited Accepted. Total balance is ${self.bal}')
+        
+    def withdraw(self, wd_amt):
+        if self.bal >= wd_amt:
+            self.bal -= wd_amt
+            print(f'Withdraw Accepted. Now balance ${self.bal}') 
+            print(‘Withdraw Accepted. Now balance {}’.format(wd_amt)) 
+        else:
+            print('Fund not Available !')
+acct1 = Account('Rohit',100)
+print(acct1)
+acct1.owner
+acct1.bal
+acct1.deposit(150)
+acct1.withdraw(90)
+-----------------------------------------------------------------------------
+
+68_Pip Install and PyPi
+
+=> PyPI is a repository for open-source third-party python packages
+=> It’s similar to Ruby Gems in the Ruby world, PHP’s Packaging, CPAN for Perl, and NPM for Node.js
+=> So far we’ve really only used libraries that come internally with Python.
+=> There are many other libraries available that people have open-sourced and shared on PyPi.
+=> We can use pip install at command line to install these packages.
+=> By installing Python from Python.org or through the anaconda distributed you also installed pip.
+=> pip is a small way to download packages at your command line directly from the PyPi repository.
+=> There are packages already created for almost any use case you can think of!
+=> A quick google search will usually help you discover a link to the PyPi page for the package, or for the package documentation.
+=> How to download and install external packages.
+ * Window: Command Prompt
+ * MacOS/Linux User : Terminal
+
+Windows
+======
+Cmd > pip install requests
+Cmd > pip install colorama
+Cmd > python
+>>> from colorama import init
+>>> init()
+>>> from colorama import Fore
+>>> print(Fore.RED + “some red Text”)
+>>> print (Fore.Green + “Switch to green”)
+>>> quit()
+
+Python Package for excel
+> pip install openpyxl
+
+69_Modules and Packages
+How to create our own modules and packages.
+=> Modules are just .py scripts that you call in another .py script.
+=> Packages are a collection of modules.
+=> Modules in Python are simply Python files with the .py extension, which implement a set of functions. 
+=> Modules are imported from other modules using the import command.
+=> To import a module, we use the import command.
+=> Let’s create some examples!
+https://docs.python.org/3/py-modindex.html 
+--------------------------------------------------------------------------------------------------------------------------------------
+%%writefile f01.py
+def myfunc(x):
+    return [num for num in range(x) if num%2==0]
+list1 = myfunc(11)
+
+%%writefile f02.py
+import f01
+f01.list1.append(11)
+print(f01.list1)
+Calling/Executing script - 
+! python f02.py
+Output:- 
+[0, 2, 4, 6, 8, 10]
+--------------------------------------------------------------------------------------------------------------------------------------
+Passing command line Argument.
+
+%%writefile f03.py
+import sys
+import f01
+num = int(sys.argv[1])
+print(f01.myfunc(num))
+
+! python f03.py 14
+Output:- 
+[0, 2, 4, 6, 8, 10, 12]
+--------------------------------------------------------------------------------------------------------------------------------------
+Accessing Module and Packaging
+
+├── MainPack
+│   ├── __init_.py  		---->	(must be Blank file)
+│   ├── mainscript.py
+│   └── SubPack
+│       ├── __init_.py 	---->	(must be Blank file)
+│       └── subscript.py
+├── prog.py
+├── prog.pyc
+└── someprog.py
+
+root@lab:~# cat MainPack/mainscript.py 
+def report_main():
+    print("Hey I'm in Main Pack")
+root@lab:~# cat MainPack/SubPack/subscript.py 
+def report_sub():
+    print("Hey I'm in subscript pack")
+root@lab:~# cat someprog.py 
+from MainPack import mainscript
+from MainPack.SubPack import subscript
+mainscript.report_main()
+subscript.report_sub()
+root@lab:~# python3 someprog.py 
+
+Output :-
+Hey I'm in Main Pack
+Hey I'm in subscript pack
+-----------------------------------------------------------------------------------------------
+mymodule.py
+def my_func():
+Print(“Hey I’m in mymodule.py”)
+
+myprog.py
+=======
+from mymodule import my_func
+my_func()
+
+Cmd > python myprog.py
+
+
+rk@mint:~$ cat mymodule.py
+def my_func():
+    print("I'm in mymodule.py")
+rk@mint:~$ cat myprog.py
+from mymodule import my_func
+from MainPack import some_main_script
+from MainPack.SubPack import sub_script 
+my_func()
+some_main_script.main_report()
+sub_script.sub_script()
+rk@mint:~$ tree MainPack
+MainPack
+├── __init__.py
+├── some_main_script.py
+└── SubPack
+    ├── __init__.py
+    └── sub_script.py
+
+
+70__name_and"_main_"
+
+=> An often confusing parts of Python is a mysterious line of code:
+If __name__ == __main__ :
+=> sometimes when you are importing from a module, you would like to know whether a modules function is being used as an import, or if you are using the original .py file of that module.
+
+-----------------------------------------------------------------------------------------------
+
+%%writefile one.py
+def func():
+    print("hello one.py")
+print("one.py Top Level is printed!")
+
+if __name__ == '__main__':
+    print("one.py have printed directly")
+else:
+print("one.py has been imported.")
+
+
+%%writefile two.py
+import one
+one.func()
+
+print("Top level is printing from Two.py ")
+
+if __name__ == '__main__':
+    print("two.py printed Directly")
+else:
+print("two.py have imported")
+
+
+!python one.py
+Output -:
+one.py Top Level is printed!
+one.py have printed directly
+
+!python two.py
+Output-:
+one.py Top Level is printed!
+one.py has been imported.
+hello one.py
+Top level is printing from Two.py 
+two.py printed Directly
+-----------------------------------------------------------------------------------------------
+
+71_Errors and Exception Handling
+
+=> Errors are bound to happen in your code!
+=> Especially when someone else ends up using it in as unexpected way.
+=> We can use error handling to attempt to plan for possible errors.
+=> For example, a user may try to write to a file that was only opened in mode=’r’
+=> Currently if there is any type of error in your code, the entire script will stop.
+=> We can use Error Handling to let the script continue with other code, even if there is an error.
+Three Keyword for this :
+* try : This is the block of code to be attempted ( may lead to an error)
+* except: Block of code will execute in case there is an error in try block.
+* finally : A final block of code to be executed, regardless of an error.
+
+def Add(n1,n2):
+Print(n1+n2)
+num1 = 10
+num2 = input(“Input number”)
+Add(num1,num2)	{throw error as not adding str+num}
+===========================================
+try :
+Result = 10 + 10
+except:
+print(“Something Wrong happen”);
+else:
+print(“add works well”)
+print(result)
+==================================================
+
+try :
+f = open(‘testfile’,’r’)
+f.write(“Write a test line”)
+except TypeError:
+print(“there was an Type error”)
+except OSError :
+print(“there was an os error”)
+except:
+print(“there other errors”)
+finally :
+print(“This is running”)
+
+=============================================
+def ask_for_int():
+    while True:
+        try :
+            num = int(input("input a number : "))
+        except ValueError:
+            print("Retry 0-9 only")
+            continue
+        else:
+            print("Sucess,")
+            print(num)
+            break
+        finally :
+            print("I always running")
+ask_for_int()
+==============================
+# Problem-1
+# for i in ['a','b','c']:
+#    print(i**2)
+try:
+    for i in ['a','b','c']:
+        print(i**2)
+except:
+    print("Some type error")
+else:
+    print("sucess")
+finally:
+    print("Last block comleting")
+======================================
+# Problem-2
+#x = 5
+#y = 0
+#z = x/y
+try:    
+    x = 5
+    y = 0
+    z = x/y
+except ZeroDivisionError:
+    print("not able to divide with zero,")
+except :
+    print("some error happen")
+else:
+    print("sucess!")
+finally:
+    print("All Done!")
+======================================
+# Problem-3 : Write a function that asks for an integer and prints the square of it. Use a while loop 
+# with a try, except, else block to account for incorrect inputs.
+# def ask():
+#    pass
+
+def ask(n):
+        return f'Thank you!, Square of given number is : {n*n}'
+while True:
+    try:
+        num = int(input("Input value for square - "))
+    except:
+        print("An error occurred! Please try again!")
+        continue
+    else:
+        print("integer Received")
+        print(ask(num))
+        break
+    #finally:
+    #    print("All done")
+============================================
+74_Pylint Overview
+
+Unit Testing
+=> As you begin to expand to larger multi-file projects it becomes important to have tests in place.
+=> This is way as you make changes or update your code, you can run your test files to make sure previous code still runs as expected.
+=> Python as a set of style convention rules known as “PEP 8”.
+=> Afterwards we will explore how to test our code with the built-in unittest library.
+=> we will be creating .py scripts in sublime.
+=> for code using the %%writefile magic jupyter command.
+
+=> There are several Testing tools, we will focus on two:
+* pylint :- This is a library that looks at your code and reports back possible issues.
+* unittest :- This built-in library will allow you to test your own programs and check you are getting desired outputs
+
+$ apt-get install python-setuptools
+$ pip install pylint
+$ pip install --upgrade setuptools
+$ python -m pip install setuptools
+--------------------------------------------------------------------------------------------------
+rk@mint:~/testing/python$ cat simple1.py 
+'''
+This is comment here
+'''
+def func():
+    '''
+    Another comment
+    '''
+    num1 = 1
+    print(num1)
+func()
+rk@mint:~/testing/python$ python simple1.py 
+1
+rk@mint:~/testing/python$ pylint simple1.py 
+No config file found, using default configuration
+************* Module simple1
+C:  9, 0: Unnecessary parens after 'print' keyword (superfluous-parens)
+------------------------------------------------------------------
+Your code has been rated at 7.50/10 (previous run: 7.50/10, +0.00)
+
+75_Running tests with the Unittest Library
+
+Testing tools
+There are dozens of good testing libraries out there. Most are third-party packages that require an install, such as:
+pylint : https://www.pylint.org/ 
+pyflakes : https://pypi.python.org/pypi/pyflakes/ 
+pep8 : https://pypi.python.org/pypi/pep8 
+
+These are simple tools that merely look at your code, and they'll tell you if there are style issues or simple problems like variable names being called before assignment.
+A far better way to test your code is to write tests that send sample data to your program, and compare what's returned to a desired outcome.
+Two such tools are available from the standard library:
+unittest - https://pypi.python.org/pypi/pep8  
+doctest - https://docs.python.org/3/library/doctest.html 
+Unit Testing
+---------------------------------------------------------------------------------------------------------------------------------
+%%writefile cap.py
+'''
+This is docstring
+'''
+def cap(text):
+return text.title()     ## capitalize()
+
+%%writefile test_cap.py
+'''
+This is docstring
+'''
+import unittest
+import cap
+class Test_cap(unittest.TestCase):
+    def test_one(self):
+        text = 'python'
+        result = cap.cap(text)
+        self.assertEqual(result,'Python')
+    
+    def test_two(self):
+        text = 'my python'
+        result = cap.cap(text)
+        self.assertEqual(result,'My Python')
+    def test_three(self):
+        text = 'this is text'
+        result = cap.cap(text)
+        self.assertEqual(result,'This Is Text')
+if __name__ == '__main__':
+unittest.main()
+
+! python test_cap.py
+Output -:
+..
+----------------------------------------------------------------------
+Ran 3 tests in 0.000s
+OK
+
+---------------------------------------------------------------------------------------------------------------------------------
+
+81_Decorators with Python Overview
+
+Decorators
+Let's now discuss a more advanced Python topic:Decorators.
+Decorators allow you to "decorate" a function, lets discuss what that word mean in this context
+
+Imagine you created a function:
+def simple_func():
+	# Do simple stuff
+	return something
+
+Now you want to add some new capabilities to the function:
+def simple_func():
+	# Want to do more stuff!
+	# Do simple stuff
+	return something
+
+You now have two options:
+    • - Add that extra code(functionality) to your old function.
+    • - create a brand new function that contains the old code, and then add new code to that
+    • - But what if you then want to remove that extra "functionality"
+    • - You would need to delete it manually, or make sure to have the old function.
+    • - Is there a better way? Maybe an on/off switch to quick add this functionality ?
+    • - Python has *decorators* that allow you to take on extra functionality to an already existing function.
+    • - They use the @ operator and are then placed on top of the original function.
+    • - Now you can easily add on extra functionality with a dcorator:
+
+@some_decorator
+def simple_func():
+	# Do simple stuff
+	return something
+- This idea is prettry abstract in practice with python syntax, so we will go through the steps of amnually building out a decorator ourselves, to show what the @ operator is doing behind the scenes.
+
+----------------------------------------------------------------------------------------------------------
+def hello(name='jose'):
+    print('The hello() function has been executed')    
+    def greet():
+        return '\t This is greet() func inside hello!'    
+    def welcome():
+        return '\t This is welcome() inside hello!'    
+    print(greet())
+    print(welcome())
+print('This is end of Hello func')
+.........................................................................................................
+def hello(name='jose'):
+    
+    print('The hello() function has been executed')
+    
+    def greet():
+        return '\t This is greet() func inside hello!'
+    
+    def welcome():
+        return '\t This is welcome() inside hello!'
+    
+    print('Going to return Function.')
+    if name == 'jose':
+        return greet
+    else:
+        return welcome
+.........................................................................................................
+new_func = hello('jose')
+Output -:
+The hello() function has been executed
+Going to return Function.
+.........................................................................................................
+new_func()
+Output -:
+'\t This is greet() func inside hello!'
+.........................................................................................................
+def cool():
+    def super_cool():
+        return 'I\'m Supper cool'
+return super_cool()
+.........................................................................................................
+Cool()
+Output -:
+"I'm Supper cool"
+
+.........................................................................................................
+def other(other_def_func):
+    print("Some other fuction code will run Here!")
+print(other_def_func())
+.........................................................................................................
+other(cool)
+Output -:
+Some other fuction code will run Here!
+I'm Supper cool
+
+Decorator :
+
+STEP -1:
+.....................................................
+def new_decorator(original_func):
+	def wrap_func():
+		print('some extra code, before the original function')
+		original_func()
+		print('Some extra code after the function')
+	return wrap_func
+.....................................................
+def need_decorator():
+print("I need Decorator")
+.....................................................
+new_func = new_decorator(need_decorator)
+.....................................................
+new_func()
+Output -:
+some extra code, before the original function
+I need Decorator
+Some extra code after the function
+
+STEP-2 :
+.....................................................
+def new_decorator(original_func):
+	def wrap_func():
+		print('some extra code, before the original function')
+		original_func()
+		print('Some extra code after the function')
+	return wrap_func
+.....................................................
+@new_decorator
+def need_decorator():
+print("I need Decorator")
+.....................................................
+need_decorator()
+Output -:
+some extra code, before the original function
+I need Decorator
+Some extra code after the function
+
+
+Flask:
+https://github.com/pallets/flask
+https://wsgi.readthedocs.io/en/latest/genindex.html
+https://wsgi.readthedocs.io/en/latest/
+https://wsgi.readthedocs.io/en/latest/frameworks.html 
+Flask is a lightweight WSGI web application framework. It is designed to make getting started quick and easy, with the ability to scale up to complex applications. It began as a simple wrapper around Werkzeug and Jinja and has become one of the most popular Python web application frameworks.
+Flask is a micro-framework for Python based on Werkzeug, Jinja 2 and good intentions.
+It inherits its high WSGI usage and compliance from Werkzeug.
+https://flask.palletsprojects.com/en/1.1.x/
+https://flask.palletsprojects.com/en/1.1.x/quickstart/
+https://flask.palletsprojects.com/en/1.1.x/patterns/viewdecorators/ 
+
+
+83_Generators with Python
+    • - We've learned how to create functions with def and the return statement.
+    • - Generator functions allow us to write a function that can send back a value and then later resume to pick up where it left off.
+    • - This type of function is a generator in Python, allowing us to generate a sequence of values over time.
+    • - The main difference in syntax will be the use of a yield statement.
+    • - When a generator function is compiled they become an object that supports an iteration protocol.
+    • - That means when they are called in code they don't actually return a value and then exit.
+    • - Generator functions will automatically suspend and resume their execution and state around the last point of value generation.
+    • - The advantage is that instead of having to compute an entire series of values up front, the generator computes one value waits until the next value is called for.
+    • - For example, the range() function doesn't produce an list in memory for all the values from start to stop.
+    • - Instead it just keeps track of the last number and the step size, to provide a flow of numbers.
+    • - If a user did need the list, they have to transform the generator to a list with list(range(0,10))
+    • - Lets's explore how to create our own generators!
+
+-------------------------------------------------------------------------------------------------
+CASE-1: Without using Generator
+def get_cube(n):
+    result = []  # need memory to store list
+    for i in range(n):
+        result.append(i**3) 
+return result
+
+get_cube(10)
+Output -:
+[0, 1, 8, 27, 64, 125, 216, 343, 512, 729]
+
+for x in get_cube(5): print(x)
+Output -:
+0
+1
+8
+27
+64
+CASE-2: Using Generator (yield)
+
+def create_cube(n):
+    for i in range(n):
+        yield i**3
+
+print(list(create_cube(4)))     	# create list with generator object
+print(create_cube(5))           	# print object Address
+for i in create_cube(4): print(i)  	# return Fibonacci
+
+Output -:
+[0, 1, 8, 27]
+<generator object create_cube at 0x7fada04d9408>
+0
+1
+8
+27
+
+Another Example -:
+
+def fabon(n):
+    a=1
+    b=1
+    #output = []
+    for i in range(n):
+        #output.append(a)
+        yield a
+        a,b = b,a+b
+#return output
+
+for n in fabon(5): print(n)
+Output-:
+1
+1
+2
+3
+5
+next() built-in functions
+def simple_gen():
+    for x in range(3):
+        yield x
+
+# for i in simple_gen(): print(i)
+
+g = simple_gen()
+print(g)        # prints generator object
+print(next(g))
+print(next(g))
+print(next(g))
+<generator object simple_gen at 0x7fada04d9660>
+0
+1
+2
+
+print(next(g))
+Output -:
+---------------------------------------------------------------------------
+StopIteration                             Traceback (most recent call last)
+<ipython-input-56-1dfb29d6357e> in <module>()
+----> 1 print(next(g))
+StopIteration:
+ 
+iter() built-in functions
+
+s = 'hello'
+#for i in s: print(i)
+#next(s)
+s_iter = iter(s)          # reform for iterate
+next(s_iter)             # iterate the next value
+
+
+87_Collections Module- counter
