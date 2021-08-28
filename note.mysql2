@@ -1,3 +1,4 @@
+<p> 
 1]- What is mysql ? [http://zetcode.com/databases/mysqltutorial/introduction/]
  A- MySQL is a leading open source database management system. It is a multi-user, multithreaded database management system.
 ==> LAMP = Linux Apache Mysql PHP
@@ -412,3 +413,4 @@ books2.csv  books.csv  file1.csv  file2.csv
  > mysql -uroot -p -e "LOAD XML INFILE '/tmp/bookbak.xml' INTO TABLE world.book;"       
 [/tmp/systemd-private-d195696fe51849f09a8d0e440b3ed431-mariadb.service-22CgMF/tmp/bookbak.xml]
  > mysql -uroot -p -e "select count(*) from world.book;"
+</p>
