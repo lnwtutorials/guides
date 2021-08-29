@@ -1,0 +1,189 @@
+<body>
+VCS tool: version control system
+GIT : Git is a openseource revision control system which allow to manage developer changes.
+
+Advantages:
+=> Each chages is commited twith a log message.This allows the developer to declare why the changes was made.
+=> File can be rolled back to and earler version. This is useful if a working files gets brokesn, then is commited into the repository.
+=> File changes between commits can be displayed. A history of changes to a file a show how tit has evolved through the life of the project.
+=> A revision control system also recordswho makes a changes and the date/time when it was committed. This permits other project members to identify who to blame( or praise) for a given change.
+=> Multiple contributors cna commit changes to a shared project. Revision control systems allow users to merge their changes together so one contributor's changes do not overwrite someone else's changes.
+=> Many revision control systems, including Git have hooks that facilitate workflow automation, More about this will be discussed later in this section.
+-----------------------------------------------------------
+[GIT Arch]
+...........
+1) Git Server
+	* Cloud based( SAAS): GITHUB/Gitlab/code commit
+	* internally company based:
+
+2) Git Client
+	* Developer Workstation
+	* Can be anywhere
+3) Git repository
+	* Remote repository : Server side
+	* Local repository : client Side/workstation
+4) Git Branch
+	* Branch is a logical repository 
+5) Git commit
+.......................................................................
+D-01(part-2)
+
+New repos:
+git init (one time)
+echo "hello" > ReadMe
+git add ReadMe (everytime when new will be added)
+git commit -m "Message"
+git log
+git show commitid
+ex.... {git show 47b75ba1cf8535433e9e915014ababc8262268e9}
+# git remote add origin masterrepo
+# git push 
+git push --set-upstream origin master
+day1complete
+
+git pull
+
+
+----------------------
+git pull VS git clone
+=> clone: it is basically complete data fetch.
+=> pull: latest changes fetch.
+
+krnetworktraining1
+
+# git add m1.mp3	{file added}
+# git add .		{multiple file add}
+# git status -s		{check status }
+# rm -rf m1.mp3
+# git checkout m1.mp3		{revert m1.mp3 because earlier it have added then deleted}
+# git rm --cached m1.mp3	{move in non-cached area}
+
+Remember: non-tracked data recover not possible.
+
+# git reset --hard commitid
+
+========================
+ :: Day-02 ::
+========================
+
+# git log
+# git commit
+# git remote add origin https://github.com/rkkr172/HelloWorld.git
+
+~/.gitconfig 	(User's Home Directory)
+.git/config	(repository working directory)
+=> version control
+=> branching, Jenkins
+
+syntex: [git push origin master]
+..........................................................
+CASE-1
+..........................................................
+			V1,V2,v3
+
+v1,v2,Y(created but not pull)
+				v1,v2,v3
+..........................................................
+commit will throw error if push without fetching updated repo
+
+jeff: v3 push on master
+Harry: v4 updated local repo
+problem: Harry can push the changes bcz repo have updated
+Resolution: Harry merge jeff's changes with local changes:
+	pull: takes latest changes + also merge your changes
+
+	pull: different local to remote repo
+
+	# git pull origin master
+
+git branch --set-upstream-to=origin/<branch> master
+..........................................................
+CASE-2 : When we face merge conflict repo :: Jeff,Harry
+..........................................................
+Jeff : this my data
+Harry : this my data
+
+git merge --abort
+
+.................................................
+cd $ NewLocation : Clone
+then; {local change copy into new location}
+..........................................................
+CASE-3 : Pull vs Clone
+..........................................................
+VCS tools :
+1) centerilized: SVN (online work),	need to checkout with repository primary!
+2) distributed: GIT (offline work), git server not running will not occur problem
+
+clone:Just take complete data from master repo
+	but in case we have done local commit which did not push one master repo
+	so in that case pull will take latest chages an dmerge with your local changes with out data lose.
+
+First Time : Use Clone
+2nd/Ownwards Time : Use Pull
+...............................................
+
+the remote, use
+    git push origin HEAD:feature-y
+
+To push to the branch of the same name on the remote, use
+    git push origin HEAD
+
+
+branch : stash : tag : hooks : reset
+------------------------------
+Day-03
+------------------------------
+[Git Branch]
+=> It is logical partition/reporitoy inside existing repository.
+
+git checkout feature-x
+git commit -m "feature x added"
+
+git pull origin master 
+git merge --abort
+git pull origin master 
+git branch 
+echo some code > commom.c
+git branch feature-x 
+git checkout feature-x
+git add .
+git status -s
+git commit -m "ver 3.1"
+git config --global user.name "Ram"
+git config --global user.email ram@lab.in
+git commit -m "ver 3.1"
+git log
+git branch
+git push 
+
+git branch -a			(Show all branches)
+git branch -D feature-x		(Delete branch) 30:10
+
+git reset --soft 79ee1085be54fdd7b6a82945dd8434b9c692d1bd
+https://dates46226@990ys.com@github.com
+https://github.com/dates4/HelloWorld.git
+dates46226@990ys.com
+dates46226
+
+--------------------------
+[Git Stash: it contains modify changes] move staging data into stash
+# git stash save		to hold pending change into stash area
+# git stash list		to check how many stash changes
+# git stash pop stash@{0}	revert back to stash changes into git staging
+
+git add .
+git stash
+--------------------------
+git tag :: a time of many commits happen in branch which will be major changes. This time a tagging need to done to further indentify fastly. 
+
+release 4.2
+minor 4.2.1
+release 4.3
+
+# git commit -m "major change"
+# git tag 'v3.0.1'			(associate with earlier commit)
+
+# git show 'v3.0.1'	(details about tag)
+# git tag		(show listing tag)
+</body>
