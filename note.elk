@@ -1,3 +1,9 @@
+******************************************************************************
+# wget files.grouplens.org/datasets/movielens/ml-latest-small.zip
+# http://media.sundog-soft.com/es7/MoviesToJson.py
+# http://media.sundog-soft.com/es7/IndexRatings.py
+# http://media.sundog-soft.com/es7/IndexTags.py
+******************************************************************************
 # vim /etc/elasticsearch/elasticsearch.yml
 node.name: node-1
 network.host: 0.0.0.0
@@ -14,7 +20,6 @@ cluster.initial_master_nodes: ["node-1"]
 
 
 [https://www.elastic.co/guide/en/elasticsearch/reference/current/deb.html]
-[https://grouplens.org/datasets/movielens/]  Dataset
 
 echo "keystore_password" > /path/to/my_pwd_file.tmp
 chmod 600 /path/to/my_pwd_file.tmp
@@ -177,42 +182,8 @@ http://media.sundog-soft.com/es/flattened.txt
 wget files.grouplens.org/datasets/movielens/ml-latest-small.zip
 http://media.sundog-soft.com/es7/MoviesToJson.py
 http://media.sundog-soft.com/es7/IndexRatings.py
-
 http://media.sundog-soft.com/es7/IndexTags.py
 
-
-50.[Logstash]
-
-Files, S3, Beats, Kafka
-	||
-	==
-Elasticsearch,AWS,Hadoop,Mongodb
-
-- Logstash parses, transforms, and filters data as it passes through.
-- It can derive structure from unstructured data
-- It can anonymize personal data or exclude it entirely.
-- It can do geo-location lookups
-- It can scale across many nodes
-- It guarantees at-least-once delivery
-- It absorbs thoroughput from load spikes
-https://www.elastic.co/guide/en/logstash/current/filter-plugins.html
-
-==>Huge Variety of Input Source Events
-Elastic Beats - Cloudwatch - Couchdb - Drupal - Elasticsearch - Windows Event Log - Shell Output - Local Files - Ganglia - Gelf -Gemfire - Random - Generator - Github - Google Pubsub - Graphite - Hearbeats - Heroku - Http - Imap - IRC -JDBC - JMX - Kafka - Lumberjack - Meetup - Command Pipes - Puppet - Rabbitmq - Rackspace Cloud Queue - Redis - Relp -Rss - S3 - Salesforce - Snmp -Sqlite -Sqs -Stdin -Stomp - Syslog - Tcp - Twitter - Udp - Unix Sockets - Varnish Log - Websocket -Wmi -Xmpp - Zenoss - Zeromq
-
-==>Huge Variety of Output "Stash" destination
-boundary - circonus - cloudwatch -csv - datadoghq - elasticsearch - email -exec - local file - ganglia -gelf -bigquery - google cloud storage - graphite - graphitastic - pipchat - http - influxdb - irc -jira - juggernaut - kafka - librato - loggly - lumberjack - meticcatcher - mongodb - nagios - new relic insights - opentsdb - pagerduty - pipe to stdin - rabbitmq - rackspace cloud queue - redis -redmine - riak - reimann - s3 -sns - solr -sqs - statsd - stdout - stomp - syslog - tcp - udp - webhdfs - websocket - xmpp - zabbix - zeromq
-
-
-[Typcal Usage]
-(Files or Beats) Web Logs -----> (Logstash) Parse into Structured Fields, Geolocate ---------> Elasticsearch
-
-[Configuring Logstash]
-# vim /etc/logstash/conf.d/logstash.conf
-input {file {
-path => "/home/student/access_log"
-start_positioning => "beginning"
-}}
 
 # vim /etc/elasticsearch/elasticsearch.yml
 node.name: node-1
@@ -836,4 +807,3 @@ curl -XGET '127.0.0.1:9200/movies/_search?pretty' -d '{
 =>[Completion Suggesters]
 - You can also upload a list of all possible completions ahead of time using completion suggesters.
 -----------------------------------------------
-==> [43. "N-Grams Part-2"]
