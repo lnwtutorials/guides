@@ -1,8 +1,10 @@
 ******************************************************************************
 # wget files.grouplens.org/datasets/movielens/ml-latest-small.zip
+# https://grouplens.org/datasets/movielens/
 # http://media.sundog-soft.com/es7/MoviesToJson.py
 # http://media.sundog-soft.com/es7/IndexRatings.py
 # http://media.sundog-soft.com/es7/IndexTags.py
+# http://media.sundog-soft.com/es/sayt.txt
 ******************************************************************************
 # vim /etc/elasticsearch/elasticsearch.yml
 node.name: node-1
@@ -806,4 +808,81 @@ curl -XGET '127.0.0.1:9200/movies/_search?pretty' -d '{
 
 =>[Completion Suggesters]
 - You can also upload a list of all possible completions ahead of time using completion suggesters.
+-----------------------------------------------
+==> [43. "N-Grams Part-2"] Excercise
+
+# curl -XPUT '127.0.0.1:9200/movies?pretty' -d '{
+"settings": {
+"analysis": {
+"filter" : {
+"autocomplete_filter": {
+	"type":"edge_ngram",
+	"min_gram":1,
+	"max_gram":20 
+	}},
+"analyzer": {
+"autocomplete" : {
+"type" : "custom",
+"tokenizer": "standard",
+"filter": ["lowercase","autocomplete_filter"]
+}}}}}'
+
+# curl -XGET 127.0.0.1:9200/movies/_analyze?pretty -d '{"analyzer":"autocomplete","text":"Sta"}'
+# curl -XPUT '127.0.0.1:9200/movies/_mapping?pretty' -d '{ "properties" : { "title": { "type":"text", "analyzer":"autocomplete" }}}'
+# curl -XPUT '127.0.0.1:9200/_bulk' --data-binary @movies.json
+# curl -XGET '127.0.0.1:9200/movies/_search?pretty' -d '{ "query": {"match": {"title" : "sta" }}}'
+# curl -XGET '127.0.0.1:9200/movies/_search?pretty' -d '{ "query": { "match": { "title" : { "query" : "sta", "analyzer" : "standard" }}}}'
+# curl -XGET '127.0.0.1:9200/movies/_search?pretty' -d '{
+"query": {
+	"match": {
+	"title" : { "query" : "Star tre",
+	"analyzer" : "standard"
+		}}
+	}
+}'
+-----------------------------------------------
+==> [44. "Search As you Type" Field Type]
+=> Autocomplete with Search_as_you_type
+=> Type-as-you-search Datatype
+
+(movie_title) ["Star Wars: Episode VII- The Force Awakens"]
+	|
+	|->----mapped as a datatype---------------------> (subfield)["s","st","sta","star"]
+		search_as_you_type
+
+#http://media.sundog-soft.com/es/sayt.txt
+1.
+# curl --silent --request POST 'http://localhost:9200/movies/_analyze?pretty' --data-raw '{ "tokenizer" : "standard", "filter": [{"type":"edge_ngram", "min_gram": 1, "max_gram": 4}], "text" : "Star" }'
+
+2.
+# curl --request PUT 'http://localhost:9200/autocomplete' -d '{ "mappings": { "properties": { "title": { "type": "search_as_you_type" }, "genre": { "type": "search_as_you_type" } } } }'
+
+3.
+# curl --silent --request POST 'http://localhost:9200/_reindex?pretty' --data-raw '{ "source": { "index": "movies" }, "dest": { "index": "autocomplete" } }' | grep "total\|created\|failures"
+
+4.
+# curl -s --request GET 'http://localhost:9200/autocomplete/_search?pretty' --data-raw '{ "size": 5, "query": { "multi_match": { "query": "Sta", "type": "bool_prefix", "fields": ["title","title._2gram","title._3gram"] }}}'
+
+5.
+# while true 
+do
+ IFS= read -rsn1 char
+ INPUT=$INPUT$char
+ echo $INPUT
+ curl --silent --request GET 'http://localhost:9200/autocomplete/_search' \
+ --data-raw '{
+     "size": 5,
+     "query": {
+         "multi_match": {
+             "query": "'"$INPUT"'",
+             "type": "bool_prefix",
+             "fields": [
+                 "title",
+                 "title._2gram",
+                 "title._3gram"
+             ]
+         }
+     }
+ }' | jq .hits.hits[]._source.title | grep -i "$INPUT"
+done
 -----------------------------------------------
