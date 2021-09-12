@@ -1,0 +1,839 @@
+# vim /etc/elasticsearch/elasticsearch.yml
+node.name: node-1
+network.host: 0.0.0.0
+discovery.seed_hosts: ["127.0.0.1"]
+cluster.initial_master_nodes: ["node-1"]
+
+# curl -XGET 127.0.0.1:9200
+# wget http://media.sundog-soft.com/es7/shakes-mapping.json
+# curl -H "Content-Type: application/json" -XPUT 127.0.0.1:9200/shakespeare --data-binary @shakes-mapping.json
+
+# wget http://media.sundog-soft.com/es7/shakespeare_7.0.json
+# curl -H "Content-Type: application/json" -XPOST '127.0.0.1:9200/shakespeare/_bulk' --data-binary @shakespeare_7.0.json
+# curl -H "Content-Type: application/json" -XGET '127.0.0.1:9200/shakespeare/_search?pretty' -d '{ "query" : { "match_phrase":{"text_entry":"to be or not to be"}}}'
+
+
+[https://www.elastic.co/guide/en/elasticsearch/reference/current/deb.html]
+[https://grouplens.org/datasets/movielens/]  Dataset
+
+echo "keystore_password" > /path/to/my_pwd_file.tmp
+chmod 600 /path/to/my_pwd_file.tmp
+sudo systemctl set-environment ES_KEYSTORE_PASSPHRASE_FILE=/path/to/my_pwd_file.tmp
+sudo systemctl start elasticsearch.service
+
+curl -XGET 'http://localhost:9200/ilebear-*'/_search?prettry'
+-----------------------------------------------
+GET _search 
+{
+"query" : {
+	"match": {
+		"firstname":  "Rowena"
+		}
+	}
+}
+-----------------------------------------------
+GET _search 
+{
+"query" : {
+	"range": {
+		"balance": {
+		"gte": 44999,
+		"lte": 9000000
+			}
+		}
+	}
+}
+-----------------------------------------------
+POST _analyze
+{
+"analyzer" : "whitespace",
+"text": "Elasticsearch is the heart of elastic stack"
+}
+-----------------------------------------------
+
+A mapping is a "Schema definition". Elasticsearch has reasonable defaults, but sometimes you need to customize them.
+curl -XPUT 127.0.0.1:9200/movies -d ' { "mappings" : { "properties" : { "year" : {"type" : "date" } }}}'
+
+=> Common Mappings
+Field types : String, byte,short,integer,long,float,double,boolean,date
+* "properties" : {"user_id":{"type": "long"}}
+
+Field Index : Do you want this field indexed for full-text search? analyzed/not_analyzed/no
+* "properties" : {"genre":{"index":"not_analyzed"}}
+
+Field Analyzer : Define your tokenizer and token filter. standard/whitespace/simple/english etc.
+* "properties" : {"description":{"analyzer":"english"}}
+
+==> More About Analyzers
+- Character Filters : Remove HTML encoding, convert & to and
+- Tokenizer : Split strings on whitespace/punctuation/non-letters
+- Token Filter : Lowercasing, stemming, synonyms, stopwords
+
+==> Choices for Analyzers
+- Standard : Splits on word boundaries, remove punctuation lowercases. good choice if language is unknown
+- Simple: Split on anything that isn't a letter, and lowercase
+- Whitespace: Splits on whitespace but doesn't lowercase
+- Language (i.e. english) : Accounts for language-specific stopwords and stemming
+
+anon@host211:~$ mkdir bin
+anon@host211:~$ vim bin/curl
+anon@host211:~$ chmod a+x bin/*
+anon@host211:~$ cd ~
+anon@host211:~$ source .profile
+anon@host211:~$ which curl
+/home/anon/bin/ curl 
+
+==> Import a Single Movie Via JSON
+# curl -XPUT 127.0.0.1:9200/movies -d '{ "mappings": { "properties": {"year": {"type":"date"}}}}'
+# curl -XGET 127.0.0.1:9200/_mappings 
+# curl -XPUT 127.0.0.1:9200/movies/_doc/109487 -d '{"genre" : ["IMAX","Sci-Fi"], "title": "Interstellar", "year" : 2014 }'
+# curl -XGET 127.0.0.1:9200/movies/_search?pretty
+
+==> Import a Bulk Movie Via JSON
+
+{ "create" : { "_index" : "movies", "_id" : "135569" } }
+{ "id": "135569", "title" : "Star Trek Beyond", "year":2016 , "genre":["Action", "Adventure", "Sci-Fi"] }
+{ "create" : { "_index" : "movies", "_id" : "122886" } }
+{ "id": "122886", "title" : "Star Wars: Episode VII - The Force Awakens", "year":2015 , "genre":["Action", "Adventure", "Fantasy", "Sci-Fi", "IMAX"] }
+{ "create" : { "_index" : "movies", "_id" : "109487" } }
+{ "id": "109487", "title" : "Interstellar", "year":2014 , "genre":["Sci-Fi", "IMAX"] }
+{ "create" : { "_index" : "movies", "_id" : "58559" } }
+{ "id": "58559", "title" : "Dark Knight, The", "year":2008 , "genre":["Action", "Crime", "Drama", "IMAX"] }
+{ "create" : { "_index" : "movies", "_id" : "1924" } }
+{ "id": "1924", "title" : "Plan 9 from Outer Space", "year":1959 , "genre":["Horror", "Sci-Fi"] }
+
+# curl -XPUT 127.0.0.1:9200/_bulk?pretty --data-binary @movies.json
+
+==> Updating data in elasticsearch ( immutable, but when updating version number incremented)
+# curl -XPOST 127.0.0.1:9200/movies/_doc/109487/_update -d '{"doc":{"title":"Interstellar"}}'
+
+==> Deleting data in elasticsearch
+# curl -XGET 127.0.0.1:9200/movies/_search?q=Dark
+(found id=58559)
+# curl -XDELETE 127.0.0.1:9200/movies/_doc/58559?pretty
+
+==> Deleaing with Concurrency. 
+- Optimistic concurrency control (use retry_on _conflicts = N to automatically retry.)
+
+# curl -XGET 127.0.0.1:9200/movies/_doc/109487?pretty
+
+# curl -XPUT "127.0.0.1:9200/movies/_doc/109487?if_seq_no=7&if_primary_term=1" -d '{"genere" :["IMAX","Sci-Fi"], "title":"Interstellar foo", "year": 2014}'
+
+#  curl -XPOST "127.0.0.1:9200/movies/_doc/109487/_update?retry_on_conflict=8" -d '{"doc":{"title":"Interstellar typo"}}'
+
+
+==> Using Analyzer & Tokenizer
+
+[Using Analyzer]
+- Somethimes text fields should be exact match
+	* Use Keyword mapping instead of text
+- Search on analyzed text fields will return anything remotely relevant
+	* Depending on the analyzer, result will be cas-insensitive, stemmed, stopwords removed, synonyms applied, etc.
+	* Searches with multiple terms need not match them all
+
+# curl -XGET 127.0.0.1:9200/movies/_search?pretty -d '{"query":{"match":{"title":"Star Trek"}}}'
+# curl -XGET 127.0.0.1:9200/movies/_search?pretty -d '{"query":{"match_phrase":{"genre":"sci"}}}'
+
+# curl -XDELETE 127.0.0.1:9200/movies/
+
+curl -XPUT 127.0.0.1:9200/movies -d '{
+"mappings":{
+"properties": {
+"id": {"type":"integer"},
+"year": {"type":"date"},
+"genre" : {"type":"keyword"},
+"title" : {"type":"text","analyzer":"english"}
+}
+}
+}'
+
+# curl -XPUT 127.0.0.1:9200/movies -d '{"mappings":{"properties": {"id": {"type":"integer"},"year": {"type":"date"},"genre" : {"type":"keyword"},"title" : {"type":"text","analyzer":"english"}}}}'
+
+==> Data Modeling & Parent/Child Relationship
+
+curl -XPUT 127.0.0.1:9200/series -d '{
+"mappings": {
+"properties":{
+"film_to_franchise": {
+"type":"join",
+"relations":{"franchise":"film"}
+} } } }'
+
+# curl -XPUT 127.0.0.1:9200/series -d ' {"mappings":{"properties":{"film_to_franchise":{"type":"join","relations":{"franchise":"film"}}}}}'
+
+# wget http://media.sundog-soft.com/es7/series.json
+# curl -XPUT 127.0.0.1:9200/_bulk?pretty --data-binary @series.json
+
+[has_parent]
+# curl -XGET 127.0.0.1:9200/series/_search?pretty -d '{"query":{"has_parent":{"parent_type":"franchise","query":{"match":{"title":"Star Wars"}}}}}'
+
+[has_child]
+# curl -XGET 127.0.0.1:9200/series/_search?pretty -d '{"query": {"has_child": {"type" : "film","query":{"match" : {"title":"The Force Awakens"}}}}}'
+
+
+==> Flattened Data Type
+
+http://media.sundog-soft.com/es/flattened.txt
+wget files.grouplens.org/datasets/movielens/ml-latest-small.zip
+http://media.sundog-soft.com/es7/MoviesToJson.py
+http://media.sundog-soft.com/es7/IndexRatings.py
+
+http://media.sundog-soft.com/es7/IndexTags.py
+
+
+50.[Logstash]
+
+Files, S3, Beats, Kafka
+	||
+	==
+Elasticsearch,AWS,Hadoop,Mongodb
+
+- Logstash parses, transforms, and filters data as it passes through.
+- It can derive structure from unstructured data
+- It can anonymize personal data or exclude it entirely.
+- It can do geo-location lookups
+- It can scale across many nodes
+- It guarantees at-least-once delivery
+- It absorbs thoroughput from load spikes
+https://www.elastic.co/guide/en/logstash/current/filter-plugins.html
+
+==>Huge Variety of Input Source Events
+Elastic Beats - Cloudwatch - Couchdb - Drupal - Elasticsearch - Windows Event Log - Shell Output - Local Files - Ganglia - Gelf -Gemfire - Random - Generator - Github - Google Pubsub - Graphite - Hearbeats - Heroku - Http - Imap - IRC -JDBC - JMX - Kafka - Lumberjack - Meetup - Command Pipes - Puppet - Rabbitmq - Rackspace Cloud Queue - Redis - Relp -Rss - S3 - Salesforce - Snmp -Sqlite -Sqs -Stdin -Stomp - Syslog - Tcp - Twitter - Udp - Unix Sockets - Varnish Log - Websocket -Wmi -Xmpp - Zenoss - Zeromq
+
+==>Huge Variety of Output "Stash" destination
+boundary - circonus - cloudwatch -csv - datadoghq - elasticsearch - email -exec - local file - ganglia -gelf -bigquery - google cloud storage - graphite - graphitastic - pipchat - http - influxdb - irc -jira - juggernaut - kafka - librato - loggly - lumberjack - meticcatcher - mongodb - nagios - new relic insights - opentsdb - pagerduty - pipe to stdin - rabbitmq - rackspace cloud queue - redis -redmine - riak - reimann - s3 -sns - solr -sqs - statsd - stdout - stomp - syslog - tcp - udp - webhdfs - websocket - xmpp - zabbix - zeromq
+
+
+[Typcal Usage]
+(Files or Beats) Web Logs -----> (Logstash) Parse into Structured Fields, Geolocate ---------> Elasticsearch
+
+[Configuring Logstash]
+# vim /etc/logstash/conf.d/logstash.conf
+input {file {
+path => "/home/student/access_log"
+start_positioning => "beginning"
+}}
+
+# vim /etc/elasticsearch/elasticsearch.yml
+node.name: node-1
+network.host: 0.0.0.0
+discovery.seed_hosts: ["127.0.0.1"]
+cluster.initial_master_nodes: ["node-1"]
+
+# curl -XGET 127.0.0.1:9200
+# wget http://media.sundog-soft.com/es7/shakes-mapping.json
+# curl -H "Content-Type: application/json" -XPUT 127.0.0.1:9200/shakespeare --data-binary @shakes-mapping.json
+
+# wget http://media.sundog-soft.com/es7/shakespeare_7.0.json
+# curl -H "Content-Type: application/json" -XPOST '127.0.0.1:9200/shakespeare/_bulk' --data-binary @shakespeare_7.0.json
+# curl -H "Content-Type: application/json" -XGET '127.0.0.1:9200/shakespeare/_search?pretty' -d '{ "query" : { "match_phrase":{"text_entry":"to be or not to be"}}}'
+
+
+[https://www.elastic.co/guide/en/elasticsearch/reference/current/deb.html]
+
+echo "keystore_password" > /path/to/my_pwd_file.tmp
+chmod 600 /path/to/my_pwd_file.tmp
+sudo systemctl set-environment ES_KEYSTORE_PASSPHRASE_FILE=/path/to/my_pwd_file.tmp
+sudo systemctl start elasticsearch.service
+
+curl -XGET 'http://localhost:9200/ilebear-*'/_search?prettry'
+-----------------------------------------------
+GET _search 
+{
+"query" : {
+	"match": {
+		"firstname":  "Rowena"
+		}
+	}
+}
+-----------------------------------------------
+GET _search 
+{
+"query" : {
+	"range": {
+		"balance": {
+		"gte": 44999,
+		"lte": 9000000
+			}
+		}
+	}
+}
+-----------------------------------------------
+POST _analyze
+{
+"analyzer" : "whitespace",
+"text": "Elasticsearch is the heart of elastic stack"
+}
+-----------------------------------------------
+
+A mapping is a "Schema definition". Elasticsearch has reasonable defaults, but sometimes you need to customize them.
+curl -XPUT 127.0.0.1:9200/movies -d ' { "mappings" : { "properties" : { "year" : {"type" : "date" } }}}'
+
+=> Common Mappings
+Field types : String, byte,short,integer,long,float,double,boolean,date
+* "properties" : {"user_id":{"type": "long"}}
+
+Field Index : Do you want this field indexed for full-text search? analyzed/not_analyzed/no
+* "properties" : {"genre":{"index":"not_analyzed"}}
+
+Field Analyzer : Define your tokenizer and token filter. standard/whitespace/simple/english etc.
+* "properties" : {"description":{"analyzer":"english"}}
+
+==> More About Analyzers
+- Character Filters : Remove HTML encoding, convert & to and
+- Tokenizer : Split strings on whitespace/punctuation/non-letters
+- Token Filter : Lowercasing, stemming, synonyms, stopwords
+
+==> Choices for Analyzers
+- Standard : Splits on word boundaries, remove punctuation lowercases. good choice if language is unknown
+
+- Simple: Split on anything that isn't a letter, and lowercase
+
+- Whitespace: Splits on whitespace but doesn't lowercase
+
+- Language (i.e. english) : Accounts for language-specific stopwords and stemming
+
+anon@host211:~$ mkdir bin
+anon@host211:~$ vim bin/curl
+anon@host211:~$ chmod a+x bin/*
+anon@host211:~$ cd ~
+anon@host211:~$ source .profile
+anon@host211:~$ which curl
+/home/anon/bin/ curl 
+
+==> Import a Single Movie Via JSON
+# curl -XPUT 127.0.0.1:9200/movies -d '{ "mappings": { "properties": {"year": {"type":"date"}}}}'
+# curl -XGET 127.0.0.1:9200/_mappings 
+# curl -XPUT 127.0.0.1:9200/movies/_doc/109487 -d '{"genre" : ["IMAX","Sci-Fi"], "title": "Interstellar", "year" : 2014 }'
+# curl -XGET 127.0.0.1:9200/movies/_search?pretty
+
+==> Import a Bulk Movie Via JSON
+
+{ "create" : { "_index" : "movies", "_id" : "135569" } }
+{ "id": "135569", "title" : "Star Trek Beyond", "year":2016 , "genre":["Action", "Adventure", "Sci-Fi"] }
+{ "create" : { "_index" : "movies", "_id" : "122886" } }
+{ "id": "122886", "title" : "Star Wars: Episode VII - The Force Awakens", "year":2015 , "genre":["Action", "Adventure", "Fantasy", "Sci-Fi", "IMAX"] }
+{ "create" : { "_index" : "movies", "_id" : "109487" } }
+{ "id": "109487", "title" : "Interstellar", "year":2014 , "genre":["Sci-Fi", "IMAX"] }
+{ "create" : { "_index" : "movies", "_id" : "58559" } }
+{ "id": "58559", "title" : "Dark Knight, The", "year":2008 , "genre":["Action", "Crime", "Drama", "IMAX"] }
+{ "create" : { "_index" : "movies", "_id" : "1924" } }
+{ "id": "1924", "title" : "Plan 9 from Outer Space", "year":1959 , "genre":["Horror", "Sci-Fi"] }
+
+# curl -XPUT 127.0.0.1:9200/_bulk?pretty --data-binary @movies.json
+
+==> Updating data in elasticsearch ( immutable, but when updating version number incremented)
+# curl -XPOST 127.0.0.1:9200/movies/_doc/109487/_update -d '{"doc":{"title":"Interstellar"}}'
+
+==> Deleting data in elasticsearch
+# curl -XGET 127.0.0.1:9200/movies/_search?q=Dark
+(found id=58559)
+# curl -XDELETE 127.0.0.1:9200/movies/_doc/58559?pretty
+
+==> Deleaing with Concurrency. 
+- Optimistic concurrency control (use retry_on _conflicts = N to automatically retry.)
+
+# curl -XGET 127.0.0.1:9200/movies/_doc/109487?pretty
+
+# curl -XPUT "127.0.0.1:9200/movies/_doc/109487?if_seq_no=7&if_primary_term=1" -d '{"genere" :["IMAX","Sci-Fi"], "title":"Interstellar foo", "year": 2014}'
+
+#  curl -XPOST "127.0.0.1:9200/movies/_doc/109487/_update?retry_on_conflict=8" -d '{"doc":{"title":"Interstellar typo"}}'
+
+
+==> Using Analyzer & Tokenizer
+
+[Using Analyzer]
+- Somethimes text fields should be exact match
+	* Use Keyword mapping instead of text
+- Search on analyzed text fields will return anything remotely relevant
+	* Depending on the analyzer, result will be cas-insensitive, stemmed, stopwords removed, synonyms applied, etc.
+	* Searches with multiple terms need not match them all
+
+# curl -XGET 127.0.0.1:9200/movies/_search?pretty -d '{"query":{"match":{"title":"Star Trek"}}}'
+# curl -XGET 127.0.0.1:9200/movies/_search?pretty -d '{"query":{"match_phrase":{"genre":"sci"}}}'
+
+# curl -XDELETE 127.0.0.1:9200/movies/
+
+curl -XPUT 127.0.0.1:9200/movies -d '{
+"mappings":{
+"properties": {
+"id": {"type":"integer"},
+"year": {"type":"date"},
+"genre" : {"type":"keyword"},
+"title" : {"type":"text","analyzer":"english"}
+}
+}
+}'
+
+# curl -XPUT 127.0.0.1:9200/movies -d '{"mappings":{"properties": {"id": {"type":"integer"},"year": {"type":"date"},"genre" : {"type":"keyword"},"title" : {"type":"text","analyzer":"english"}}}}'
+
+==>[26] Data Modeling & Parent/Child Relationship
+
+curl -XPUT 127.0.0.1:9200/series -d '{
+"mappings": {
+"properties":{
+"film_to_franchise": {
+"type":"join",
+"relations":{"franchise":"film"}
+} } } }'
+
+# curl -XPUT 127.0.0.1:9200/series -d ' {"mappings":{"properties":{"film_to_franchise":{"type":"join","relations":{"franchise":"film"}}}}}'
+
+# wget http://media.sundog-soft.com/es7/series.json
+# curl -XPUT 127.0.0.1:9200/_bulk?pretty --data-binary @series.json
+
+[has_parent]
+# curl -XGET 127.0.0.1:9200/series/_search?pretty -d '{"query":{"has_parent":{"parent_type":"franchise","query":{"match":{"title":"Star Wars"}}}}}'
+
+[has_child]
+# curl -XGET 127.0.0.1:9200/series/_search?pretty -d '{"query": {"has_child": {"type" : "film","query":{"match" : {"title":"The Force Awakens"}}}}}'
+
+
+==> Flattened Data Type
+# curl -XPUT "http://127.0.0.1:9200/demo-default/_doc/1" -d'{
+"message": "[5592:1:0309/123054.737712:ERROR:child_process_sandbox_support_impl_linux.cc(79)] FontService unique font name matching request did not receive a response."
+"fileset": { "name" : "syslog"},
+"process": { "name" : "org.gnome.shell.desktop", "pid": 3381 },
+"@timestamp": "2020-03-09T18:00:54.000+05:30",
+"host": {"hostname":"bionic","name":"bionic"}
+}'
+
+
+# curl -XGET "http://127.0.0.1:9200/demo-default/_mapping?pretty=true"
+# curl -XGET "http://127.0.0.1:9200/_cluster/state?pretty=true" >> es-cluster-state.json
+
+[Updating Cluster State]
+......................................................................
+Node-2	<====Cluster(State)======== Node-1 ======Cluster(State) ======> Node-3
+Node-2	====(Ack From Node-2)=====> Node-1 <=====(Ack From Node-3)===== Node-3
+......................................................................
+# curl -XPUT "http://127.0.0.1:9200/demo-flattened"
+
+# curl -XPUT "http://127.0.0.1:9200/demo-flattened/_mapping" -d'{
+"properties" : { "host" : {"type": "flattened"} }
+}'
+
+# curl -XGET "http://127.0.0.1:9200/demo-flattened/_mapping?pretty=true"
+
+# curl -XPOST "http://127.0.0.1:9200/demo-flattened/_update/1" -d'{
+"doc": {
+"host": {"osVersion":"Bionic Beaver", "osArchitecture":"x86_64"}
+}}'
+
+# curl -XGET "http://127.0.0.1:9200/demo-flattened/_doc/1?pretty=true"
+# curl -XGET "http://127.0.0.1:9200/demo-flattened/_mapping?pretty=true"
+
+# curl -XGET "http://127.0.0.1:9200/demo-flattened/_search?pretty=true" -d'{"query":{"match":{"host":"Bionic Beaver"}}}'
+
+ * [Supported Queries for flattened Data Types]
+	- term, terms and terms_set
+	- prefix
+	- range (non numerical range operations)
+	- match and multi_match ( we have to supply exact Keywords)
+	- query_string and simple_query_string
+	- exists
+http://media.sundog-soft.com/es/flattened.txt
+
+---------------------------------------------
+
+==> [28. Dealing with Mapping Exception]
+[Mapping]
+* Process : Defining how JSON documents will be stored
+* Result : The actual metadata resulting from the definion process
+
+1. Explicit Mapping
+	- Fields and their type are predefined.
+2. Dynamic Mapping
+	- Fields and theri types are automatically defined by Elasticsearch.
+
+[The Mapping Result]
+"Timestamp" mapped as a date
+"Service" mapped as a keyword
+"IP" mapped as an ip datatypes
+"port" mapped as an integer
+"Message" mapped as text 
+
+{"mappings" : { "properties" :
+"timetamp" : {"type":"date"},
+"service" : {"type" : "keyword" },
+"host_ip" : {"type" : "ip" },
+"port" : {"type" : "integer" },
+"message" : {"type" : "text" }
+}}
+
+[Mapping Challenges]
+=> Explicit Mapping
+	- Mapping exceptions when there's a mismatch
+=> Dynamic Mapping
+	- May lead to a mapping explosion
+
+http://media.sundog-soft.com/es/exceptions.txt
+
+1.
+curl --request PUT 'http://localhost:9200/microservice-logs' \
+--data-raw '{
+   "mappings": {
+       "properties": {
+           "timestamp": { "type": "date"  },
+           "service": { "type": "keyword" },
+           "host_ip": { "type": "ip" },
+           "port": { "type": "integer" },
+           "message": { "type": "text" }
+       }
+   }
+}'
+
+
+2.
+{"timestamp": "2020-04-11T12:34:56.789Z", "service": "ABC", "host_ip": "10.0.2.15", "port": 12345, "message": "Started!" }
+
+3.
+
+curl --request POST 'http://localhost:9200/microservice-logs/_doc?pretty' \
+--data-raw '{"timestamp": "2020-04-11T12:34:56.789Z", "service": "XYZ", "host_ip": "10.0.2.15", "port": "15000", "message": "Hello!" }'
+
+4.
+curl --request POST 'http://localhost:9200/microservice-logs/_doc?pretty' \
+--data-raw '{"timestamp": "2020-04-11T12:34:56.789Z", "service": "XYZ", "host_ip": "10.0.2.15", "port": "NONE", "message": "I am not well!" }'
+
+5.
+curl --request POST 'http://localhost:9200/microservice-logs/_close'
+ 
+curl --location --request PUT 'http://localhost:9200/microservice-logs/_settings' \
+--data-raw '{
+   "index.mapping.ignore_malformed": true
+}'
+ 
+curl --request POST 'http://localhost:9200/microservice-logs/_open'
+
+6.
+curl --request POST 'http://localhost:9200/microservice-logs/_doc?pretty' \
+--data-raw '{"timestamp": "2020-04-11T12:34:56.789Z", "service": "XYZ", "host_ip": "10.0.2.15", "port": "NONE", "message": "I am not well!" }'
+
+7.
+curl --request POST 'http://localhost:9200/microservice-logs/_doc?pretty' \
+--data-raw '{"timestamp": "2020-04-11T12:34:56.789Z", "service": "ABC", "host_ip": "10.0.2.15", "port": 12345, "message": {"data": {"received":"here"}}}'
+
+8.
+curl --request POST 'http://localhost:9200/microservice-logs/_doc?pretty' \
+--data-raw '{"timestamp": "2020-04-11T12:34:56.789Z", "service": "ABC", "host_ip": "10.0.2.15", "port": 12345, "message": "Received...", "payload": {"data": {"received":"here"}}}'
+
+9.
+curl --request POST 'http://localhost:9200/microservice-logs/_doc?pretty' \
+--data-raw '{"timestamp": "2020-04-11T12:34:56.789Z", "service": "ABC", "host_ip": "10.0.2.15", "port": 12345, "message": "Received...", "payload": {"data": {"received": {"even": "more"}}}}'
+
+10.
+thousandone_fields_json=$(echo {1..1001..1} | jq -Rn '( input | split(" ") ) as $nums | $nums[] | . as $key | [{key:($key|tostring),value:($key|tonumber)}] | from_entries' | jq -cs 'add')
+ echo "$thousandone_fields_json"
+-----------------------------------------------
+
+# apt install jq -y
+
+# curl --location --request PUT 'https://localhost:9200/big-objects'
+
+# curl --request POST 'http://localhost:9200/big-objects/_doc?pretty' --data-raw "$thousandone_fields_json"
+
+# curl --location --request POST 'http://localhost:9200/big-objects/_settings' \
+ --data-raw '{"index.mapping.total_fields.limit":1001 }'
+
+-----------------------------------------------
+==> [31. "query lite" Interface]
+
+/movies/_search?q=title:star
+/movies/_search?q=+year:>2010+title:trek
+
+And It can be Dangerous
+- Cryptic and tough to debug
+- Can be a security issue if exposed to end users
+- Fragile : one wrong character and you're hosted
+	*But it's handy for quick experimenting
+# curl -XGET 127.0.0.1:9200/movies/_search?q=title:star&pretty
+# curl -XGET 127.0.0.1:9200/movies/_search?q=+year:>2010+title:trek&pretty
+
+URI Search
+-----------------------------------------------
+==> [32. "Json Search In-Depth"] 
+
+* Request Body Search
+- Query DSL in the request body as JSON (Yes, a GET request can have a body!)
+curl -XGET 127.0.0.1:9200/movies/_search?pretty -d '{"query":{"match":{"title":"star"}}}'
+
+* Queries and Filters
+- Filters ask a yes/no question of your data
+- Queries return data in term of relevance
+
+Use filters when you can - they are faster and cacheable.
+
+[Example: Boolean query with a filter]
+====================================== (must mean and query)
+curl -XGET 127.0.0.1:9200/movies/_search?pretty -d '{"query":{"bool":{
+"must":{"term":{"title":"trek"}},
+"filter":{"range":{"year":{"gte":2010}}}
+}}}'
+
+[Some types of filter]
+======================================
+- Term: Filter by exact values
+{"term":{"year":2014}}
+
+- Term: Match if any exact values in a list match
+{"term":{"genre":["Sci-Fi","Adventure"] }}
+
+- Range: Find numbers or dates in a given range (gt, gte, lt, lte)
+{"range":{"year": {"gte": 2010}}}
+
+- Exists: Find documents where a field exists
+{"exists": {"field":"tags"}}
+
+- Missing
+{"missing": {"field":"tags"}}
+
+-Bool : Combine filters with Boolean logic( must, must_not, should)
+
+
+[Some types of Queries]
+======================================
+- Match_all: Return all documents and is the default. Normally used with a filter.
+{"match_all":{}}
+- Match: Searches analyzed results, such as full texts search.
+	{"match":{"title":"star"}}
+- Multi_match: Run the same query on multiple fields.
+	{"multi_match":{"query":"star","fields":["title","synopsis"]}}
+- Bool: Works like a bool filter, but results are scored by relevance.
+
+[Syntax Reminder]
+======================================
+Queries are wrapped in a "query" : { } block,
+Filters are wrapped in a "filter" : { } block.
+
+You can combine filters inside queries, or queries inside filters too
+
+curl -XGET 127.0.0.1:9200/movies/_search?pretty -d '{ "query": "bool" : { "must": {"term":{"title":"trek"}}, "filter":{"range":{"year":{"gte":2010}}} }}}'
+
+-----------------------------------------------
+==> [33. "Phrase Matching"]
+
+[Phrase Search]
+- Must find all term, in the right order.
+curl -XGET 127.0.0.1:9200/movies/_search?pretty -d'{"query":{"match_phrase":{"title":"star wars" }}}'
+
+[Slop]
+- Order matters,but you're OK with some words being in between the terms:
+	curl -XGET 127.0.0.1:9200/movies/_search?pretty -d'{"query":{"match_phrase":{"title":{"query":"star beyond", "slop":1} }}}'
+- The "slop" represents how far you're willing to let a term move to satisfy a phrase)in either direction!)
+Another example:"quick brown fox" would match "quick fox" with a slop of 1.
+
+[Proximity Queries]
+- Remember this is a query - result are sorted by relevance.
+- Just use a really hight slop if you wan to get any documents that contains the words in phrase, but want documents that have the words closer together scored higher.
+
+	curl -XGET 127.0.0.1:9200/movies/_search?pretty -d'{"query":{"match_phrase":{"title":{"query":"star beyond", "slop":100} }}}'
+-----------------------------------------------
+==> [34. "Querying Different Way"]
+Q. Search for "Star Wars" movies released after 1980, using both a "URI search" and a "request body search."
+
+curl -XGET "127.0.0.1:9200/movies/_search?q=+year:>1980+title:star%20wars&pretty"
+
+curl -XGET 127.0.0.1:9200/movies/_search -d'{"query":{
+"bool": {
+"must":{"match_phrase":{"title":"Star Wars"}},
+"filter":{"range":{"year":{"gte":1980}}}
+}}}'
+
+-----------------------------------------------
+==> [35. "Pagination"]
+
+- Specify "From" And "Size"
+- Pagination Syntax
+
+curl -XGET '127.0.0.1:9200/movies/_search?size=2&from=2&pretty'
+
+curl -XGET 127.0.0.1:9200/movies/_search -d'{ "from": 2, "size":2, "query": {"match":{"genre":"Sci-Fi"}}}'
+
+[Beware]
+-----------
+- Deep pagination can kill performance.
+- Every result must be retrieved, collected and sorted.
+- Enforce an upper bound on how many result you'll return to users.
+
+-----------------------------------------------
+==> [36. "Sorting"]
+
+- Sorting your result is usually Quite simple
+	curl -XGET '127.0.0.1:9200/movies/_search?sort=year&pretty'
+
+=> Unless you're Dealing with Strings.
+- A string field that is "analyzed" for full-text search can't be used to sort documents
+- This is because it exists in the inverted index as individual term, not as the entire string.
+
+=> If need to Sort on an Analyzed Text field, Map A Keyword Copy
+# curl -H "Content-Type:application/json" -XPUT "127.0.0.1:9200/movies" -d'{
+> "mappings" :{
+> "properties" :{
+> "title" : {
+> "type" : "text",
+> "fields" : {
+> "raw" : {
+> "type" : "keyword"
+> }}}}}}'
+
+=> Now you can sort on the keyword "Raw" Field.
+curl -XGET '127.0.0.1:9200/movies/_search?sort=title.raw&pretty'
+
+- Sadly, you cannot change the mapping on an existing index.
+- You'd have to delete it, set up a new mapping, and re-index it.
+- Like the number of shards, this is something you should think about before importing data into your index.
+
+
+# curl -XDELETE '127.0.0.1:9200/movies'
+# curl -XPUT 127.0.0.1:9200/movies -d '{"mappings":{"properties": {"title": {"type":"text","fields":{"raw":{"type":"keyword"}}}}}}'
+# curl -XPUT '127.0.0.1:9200/_bulk --data-binary @movies.json'
+# curl -XGET '127.0.0.1:9200/movies/_search?sort=year'
+# curl -XGET '127.0.0.1:9200/movies/_search?sort=title.raw&pretty'
+
+-----------------------------------------------
+==> [37. "More with Filters"]
+=> Another Filtered Query
+curl -XGET 127.0.0.1:9200/movies/_search -d'{
+"query":{
+	"bool": {
+		"must":{"match":{"genre":"Sci-Fi"}},
+		"must_not":{"match":{"title":"trek"}},
+		"filter":{"range":{"year":{"gte":2010,"lt":2015 }}}
+}}}'
+
+-----------------------------------------------
+==> [38. "Excercise"]
+Q. Search for science fiction movies before 1960, sorted by title.
+
+Ans.
+
+curl -XGET 127.0.0.1:9200/movies/_search?sort=title.raw&pretty -d'{
+"query" : {
+"bool" : {
+"must" : {"match" : {"title" : "Sci-Fi"}},
+"filter":{"range": {"year":{"lt":1960 }}}
+}}}'
+
+-----------------------------------------------
+==> [39. "Fuzzy Queries"]
+
+=> Fuzzy Matches :: A way to account for typos and misspellings
+
+The "levenshtein edit distance" accounts for:
+- Substitutions of characters(interstellar -> intersteller)
+- Insertions of characters(interstellar -> insterstellar)
+- Deletion of characters (interstellar -> interstelar)
+
+All of avobe have an edit distance of 1.
+
+
+=> The Fuzziness Parameter
+curl -XGET 127.0.0.1:9200/movies/_search?pretty -d'{
+"query": {
+	"fuzzy" : {
+		"title" : {"value" : "intrsteller","fuzziness":2}
+}}}'
+
+=> Auto Fuziness
+	Fuziness:AUTO
+- 0 for 1-2 character strings
+- 1 for 3-5 character strings
+- 2 for anything else
+
+curl -XGET 127.0.0.1:9200/movies/_search?pretty -d'{ "query" : {"match":{"title":"intersteller" }}}'
+curl -XGET 127.0.0.1:9200/movies/_search?pretty -d'{ "query" : {"fuzzy":{"title":{"value":"intersteller","fuzziness":2}}}}'
+curl -XGET 127.0.0.1:9200/movies/_search?pretty -d'{ "query" : {"fuzzy":{"title":{"value":"warz","fuzziness":1}}}}'
+-----------------------------------------------
+==> [40. "Partial Matching"]
+
+=> Prefix Queries On Strings
+- If we remapped year to be a string...
+curl -XGET '127.0.0.1:9200/movies/_search?pretty' -d '
+{ 
+"query" : {
+	"prefix":{
+		"year":"201"}}
+}'
+
+- Wildcard Queries
+curl -XGET '127.0.0.1:9200/movies/_search?pretty' -d '
+{ 
+"query" : {
+	"wildcard":{
+		"year":"1*"}}
+}'
+		------------(regexp queries also exist)
+
+# curl -XDELETE 127.0.0.1:9200/movies
+# curl -XPUT 127.0.0.1:9200/movies -d'{"mappings":{"properties":{"year":{"type":"text"}}}}'
+# curl -XPUT 127.0.0.1:9200/_bulk --data-binary @movies.json
+
+# curl -XGET 127.0.0.1:9200/movies/_search?pretty -d'{"query":{"prefix":{"year":"201"}}}'
+# curl -XGET 127.0.0.1:9200/movies/_search?pretty -d'{"query":{"wildcard":{"year":"19*"}}}'
+
+-----------------------------------------------
+==> [41. "Query-time Search As You Type"]
+- Abusing sloppiness...
+curl -XGET '127.0.0.1:9200/movies/_search?pretty' -d '{
+"query": { 
+	"match_phrase_prefix": {
+	"title" :{
+		"query" :" star trek",
+		"slop": 10
+}}}}'
+
+-----------------------------------------------
+==> [42. "N-Grams Part-1"]
+
+=> Index-time With N-grams
+
+====="star":=============
+unigram: 	[s,t,a,r]
+bigram: 	[st,ta,ar]
+trigram:	[sta,tar]
+4-gram:		[star]
+	*** Edge N-grams are built only on the begining of each term
+=>[Indexing N-grams]
+- Create an "Autocomplete" analyzer
+curl -XPUT '127.0.0.1:9200/movies?pretty' -d '{
+"settings": {
+"analysis": {
+"filter" : {
+	"autocomplete_filter": {
+	"type":"edge_ngram",
+	"min_gram":1,
+	"max_gram":20 }
+	},
+"analyzer": {
+	"autocomplete" : {
+	"type" : "custom",
+	"tokenizer": "standard",
+	"filter": ["lowercase","autocomplete_filter"]
+	}
+}}}'
+
+=>[Now Map Our Field With It]
+curl -XPUT '127.0.0.1:9200/movies/_mapping?pretty' -d '{
+"query": {
+	"match": {
+	"title" : { "query" : "sta",
+	"analyzer" : "standard"
+		}}
+	}
+}'
+
+	*** Otherwise our query will also get split into n-grams, and we'll get results for everthing that matches 's','t','a','st',etc.
+
+
+=>[But Only Use N-grams On The Index Side!]
+curl -XGET '127.0.0.1:9200/movies/_search?pretty' -d '{
+"properties" : {
+"title" : { "type" :"text" , "analyzer" : "autocomplete" }
+	}
+}'
+
+=>[Completion Suggesters]
+- You can also upload a list of all possible completions ahead of time using completion suggesters.
+-----------------------------------------------
+==> [43. "N-Grams Part-2"]
