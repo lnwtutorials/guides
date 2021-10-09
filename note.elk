@@ -28,7 +28,7 @@ chmod 600 /path/to/my_pwd_file.tmp
 sudo systemctl set-environment ES_KEYSTORE_PASSPHRASE_FILE=/path/to/my_pwd_file.tmp
 sudo systemctl start elasticsearch.service
 
-curl -XGET 'http://localhost:9200/ilebear-*'/_search?prettry'
+curl -XGET 'http://localhost:9200/ilebear-*'/_search?pretty'
 -----------------------------------------------
 GET _search 
 {
@@ -209,7 +209,7 @@ chmod 600 /path/to/my_pwd_file.tmp
 sudo systemctl set-environment ES_KEYSTORE_PASSPHRASE_FILE=/path/to/my_pwd_file.tmp
 sudo systemctl start elasticsearch.service
 
-curl -XGET 'http://localhost:9200/ilebear-*'/_search?prettry'
+curl -XGET 'http://localhost:9200/ilebear-*'/_search?pretty'
 -----------------------------------------------
 GET _search 
 {
@@ -766,7 +766,7 @@ unigram: 	[s,t,a,r]
 bigram: 	[st,ta,ar]
 trigram:	[sta,tar]
 4-gram:		[star]
-	*** Edge N-grams are built only on the begining of each term
+	*** Edge N-grams are built only on the beginning of each term
 =>[Indexing N-grams]
 - Create an "Autocomplete" analyzer
 curl -XPUT '127.0.0.1:9200/movies?pretty' -d '{
@@ -885,4 +885,454 @@ do
      }
  }' | jq .hits.hits[]._source.title | grep -i "$INPUT"
 done
+
 -----------------------------------------------
+==> [47. "Importing Data With a Script"]
+=> You can Import From Just About Anything
+- Stand-alone "scirpts" can submit bulk documents via REST API
+- "Logstash" and "beats" can stream data from logs, S3, databases, and more
+- AWS systems can stream in data via "lambda" or "kinesis firehose"
+- "Kafka", "spark" and more have Elasticsearch integration add-ons
+
+=> Hack Together A Script
+- Read in data from some distributed filesystem
+- Transform it into JSON bulk inserts
+- Submit via HTTP/REST to your elasticsearch cluster
+
+import csv
+import re
+csvfile = open('ml-latest-small/movies.csv', 'r')
+reader = csv.DictReader( csvfile )
+for movie in reader:
+        print ("{ \"create\" : { \"_index\": \"movies\", \"_id\" : \"" , movie['movieId'], "\" } }", sep='')
+        title = re.sub(" \(.*\)$", "", re.sub('"','', movie['title']))
+        year = movie['title'][-5:-1]
+        if (not year.isdigit()):
+            year = "2016"
+        genres = movie['genres'].split('|')
+        print ("{ \"id\": \"", movie['movieId'], "\", \"title\": \"", title, "\", \"year\":", year, ", \"genre\":[", end='', sep='')
+        for genre in genres[:-1]:
+            print("\"", genre, "\",", end='', sep='')
+        print("\"", genres[-1], "\"", end = '', sep='')
+        print ("] }")
+
+# http://media.sundog-soft.com/es7/MoviesToJson.py
+
+wget files.grouplens.org/datasets/movielens/ml-latest-small.zip
+wget http://media.sundog-soft.com/es7/MoviesToJson.py
+python3 MoviesToJson.py > moremovies.json
+curl -XDELETE 127.0.0.1:9200/movies
+curl -XPUT 127.0.0.1:9200/_bulk --data-binary @moremovies.json
+curl -XGET 127.0.0.1:9200/movies/_search?q=marry%20poppins&
+-----------------------------------------------
+==> [48. "Importing with Client Linraries" ]
+
+A Less Hacky Script.
+Free elasticsearch client libraries are available for pretty much any language.
+- "Java" has cleint maintained by elastic.co
+- "Python" has an elasticsearch package
+- Elasticsearch-"ruby"
+- Serveral choices for "scala"
+- Elasticsearch.pm module for "perl"
+
+you don't have to wrangle JSON
+es = elasticsearch.Elasticsearch()
+es.indices.delete(index="ratings",ignore=404)
+deque(helper.parallel_bulk(es,readRatings(),index="ratings"),maxlen=0)
+es.indices.refresh()
+
+
+=> For completeness:
+----------------------------------------------
+import csv
+from collections import deque
+import elasticsearch
+from elasticsearch import helpers
+
+def readMovies():
+	csv = open('ml-latest-small/movies.csv','r')
+	reader = csv.DictReader( csvfile )
+	titleLookup = {}
+	for movie in reader:
+		titleLookup[movie['movieId']] = movie['title']
+	return titleLookup
+
+def readRatings():
+	csv = open('ml-latest-small/ratings.csv','r')
+	titleLookup = readMovies()
+	reader = csv.DictReader( csvfile )
+
+	for line in reader:
+	rating = {}
+	rating['user_id'] = int(line['userId'])
+	rating['movie_id'] = int(line['movie_id'])
+	rating['title'] = int(line['movieId'])
+	rating['rating'] = int(line['rating'])
+	rating['timestamp'] = int(line['timestamp'])
+	yield rating
+
+	es = elasticsearch.Elasticsearch()
+	es.indices.delete(index="ratings",ignore=404
+	deque(helpers.parallel_bulk(es,radRatings(),index="ratings"),maxlen=0)
+	es.indices.refresh()
+
+# apt install python3-pip
+# pip3 install elasticsearch
+# wget http://media.sundog-soft.com/es7/IndexRatings.py
+# python3 IndexRatings.py
+# curl -XGET 127.0.0.1:9200/ratings/_search?pretty
+
+-----------------------------------------------
+==> [49. ] Importing with a script (Excercise)
+Write a script to import the tags.csv data from ml-latest-small into a new "tags" index.
+
+Solution :-
+
+import csv
+from collections import deque
+import elasticsearch
+from elasticsearch import helpers
+
+def readMovies():
+    csvfile = open('ml-latest-small/movies.csv', 'r')
+    reader = csv.DictReader( csvfile )
+    titleLookup = {}
+    for movie in reader:
+            titleLookup[movie['movieId']] = movie['title']
+    return titleLookup
+
+def readTags():
+    csvfile = open('ml-latest-small/tags.csv', 'r')
+    titleLookup = readMovies()
+    reader = csv.DictReader( csvfile )
+    for line in reader:
+        tag = {}
+        tag['user_id'] = int(line['userId'])
+        tag['movie_id'] = int(line['movieId'])
+        tag['title'] = titleLookup[line['movieId']]
+        tag['tag'] = line['tag']
+        tag['timestamp'] = int(line['timestamp'])
+        yield tag
+
+es = elasticsearch.Elasticsearch()
+es.indices.delete(index="tags",ignore=404)
+deque(helpers.parallel_bulk(es,readTags(),index="tags"), maxlen=0)
+es.indices.refresh()
+
+# wget http://media.sundog-soft.com/es7/IndexTags.py
+# curl -XGET 127.0.0.1:9200/tags/_search?pretty
+
+-----------------------------------------------
+50.[Logstash]
+
+==> What Logstash for ::
+
+(( Files, S3, Beats, Kafka )) ===> Logstash ===> (( Elasticsearch,AWS,Hadoop,Mongodb ))
+
+==> It's More than Plumbing
+
+- Logstash parses, transforms, and filters data as it passes through.
+- It can derive structure from unstructured data
+- It can anonymize personal data or exclude it entirely.
+- It can do geo-location lookups
+- It can scale across many nodes
+- It guarantees at-least-once delivery
+- It absorbs thoroughput from load spikes
+https://www.elastic.co/guide/en/logstash/current/filter-plugins.html
+
+==>Huge Variety of Input Source Events
+Elastic Beats - Cloudwatch - Couchdb - Drupal - Elasticsearch - Windows Event Log - Shell Output - Local Files - Ganglia - Gelf -Gemfire - Random - Generator - Github - Google Pubsub - Graphite - Hearbeats - Heroku - Http - Imap - IRC -JDBC - JMX - Kafka - Lumberjack - Meetup - Command Pipes - Puppet - Rabbitmq - Rackspace Cloud Queue - Redis - Relp -Rss - S3 - Salesforce - Snmp -Sqlite -Sqs -Stdin -Stomp - Syslog - Tcp - Twitter - Udp - Unix Sockets - Varnish Log - Websocket -Wmi -Xmpp - Zenoss - Zeromq
+
+==>Huge Variety of Output "Stash" destination
+boundary - circonus - cloudwatch -csv - datadoghq - elasticsearch - email -exec - local file - ganglia -gelf -bigquery - google cloud storage - graphite - graphitastic - pipchat - http - influxdb - irc -jira - juggernaut - kafka - librato - loggly - lumberjack - meticcatcher - mongodb - nagios - new relic insights - opentsdb - pagerduty - pipe to stdin - rabbitmq - rackspace cloud queue - redis -redmine - riak - reimann - s3 -sns - solr -sqs - statsd - stdout - stomp - syslog - tcp - udp - webhdfs - websocket - xmpp - zabbix - zeromq
+
+
+[Typcal Usage]
+(Files or Beats) Web Logs -----> (Logstash) Parse into Structured Fields, Geolocate ---------> Elasticsearch
+
+
+-----------------------------------------------
+==> [51. "Installing Logstash" ]
+
+[Configuring Logstash]
+# vim /etc/logstash/conf.d/logstash.conf
+input {file {
+path => "/home/student/access_log"
+start_positioning => "beginning"
+}}
+
+filter {
+        grok { match => {"message" => "%{COMBINEDAPACHELOG}" } }
+        date { match => ["timestamp", "dd/MMM/yyyy:HH:mm:ss Z"] }
+}
+
+output {
+        elasticsearch { hosts => ["localhost:9200"] }
+        stdout {codec => rubydebug }
+}
+
+# wget media.sundog-soft.com/es/access_log
+# sudo apt install openjdk-8-jre-headless jruby
+# sudo apt update && sudo apt install logstash
+# sudo vim /etc/logstash/conf.d/logstash.conf
+
+
+-----------------------------------------------
+==> [52. "Running Logstash" ]
+
+# wget http://media.sundog-soft.com/es/access_log
+# cd /usr/share/logstash
+# sudo bin/logstash -f /etc/logstash/conf.d/logstash.conf
+	or
+# sudo /usr/share/logstash/bin/logstash -f /etc/logstash/conf.d/logstash.conf
+
+# curl -XGET 127.0.0.1:9200/_cat/indices?v
+# curl -XGET 127.0.0.1:9200/logstash-2019.05.07-000001/_search?pretty
+
+
+-----------------------------------------------
+==> [53. "Logstash and Mysql, Part 1" ]
+
+Logstash With MySql
+
+Install A Jdbc Driver
+Get a platform-independent mysql connector form
+	https://dev.mysql.com/downloads/connector/j/
+# wget https://dev.mysql.com/get/Downloads/Connector-J/mysql-connector-java-8.0.15.zip
+# Unzip mysql-connector-java-8.0.15.zip
+
+
+==> Configure Logstash
+input { 
+    jdbc {
+	jdbc_connection_String => "jdbc:mysql://localhost:3306/movielens"
+	jdbc_user => "anon"
+	jdbc_password => "password"
+	jdbc_driver_library => "/home/anon/mysql-connector-java-8.0.15/mysql-connector-java-8.0.15.jar"
+	jdbc_driver_class => "com.mysql.jdbc.Driver"
+	statement => "SELECT * FROM movies"
+	}
+}
+
+
+# sudo apt install mysql-server
+# wget http://files.grouplens.org/datasets/movielens/ml-100k.zip
+# uzip ml-100k.zip
+# sudo mysql -u root -p
+> create database movielens;
+> create table movilens.movie (movieID INT primary Key Not Null, title Text, releaseDate date) ;
+> Load Data Local Infile 'ml-100k/u.item' Into Tables movielens.movies fields terminated by '}' (movieID, title, @var3) set releaseDate = STR_TO_DATE(@var3, '%d-%M-%Y' )  ;
+> use movielens;
+> select * from movies where title Like 'Star%';
+
+
+-----------------------------------------------
+==> [54. "Logstash and Mysql, Part 2" ]
+
+https://dev.mysql.com/downloads/connector/j/
+
+Platform independent -------> .zip archive download ----------> wget "URL"
+
+#vim /etc/logstash/conf.d/mysql.conf
+input {
+	jdbc {
+		jdbc_connection_String => "jdbc:mysql://localhost:3306/movielens"
+		jdbc_user => "anon"
+		jdbc_password => "password"
+		jdbc_driver_library => "/home/anon/mysql-connector-java-8.0.16/mysql-connector-java-8.0.16.jar"
+		jdbc_driver_class => "com.mysql,jdbc.Driver"
+	}
+}
+
+output {
+	stdout { codec => json_lines }
+	elasticsearch { 5
+		hosts => ["localhost:9200"]
+		index => "movielens-sql"
+		}
+}
+
+# mysql -uroot -p
+> create user 'anon'@'localhost' identified by 'password' ;
+> grant all privileges on *.* to 'anon'@'localhost' ;
+> flush privileges ;
+
+# cd /usr/share/logstash
+# sudo bin/logstash -f /etc/logstash/conf.d/mysql.conf
+# curl -XGET 'localhost:9200/movielens-sql/_search?q=title.Star&pretty'
+
+-----------------------------------------------
+==> [55. "Importing CSV Data With Logstash" ]
+
+Logstash: Import & Parse CSV
+
+What is CSV data ?
+	- Comma Separated Format
+	- https://github.com/coralogix-resources/elk-course-samples 
+	
+# mkdir -p /home/anon/csv-data 
+# cd /home/anon/csv-data
+# curl -O https://raw.githubusercontent.com/coralogix-resources/elk-course-samples/master/csv-schema-short-numerical.csv ; cd -
+# sudo wget -P /etc/logstash/conf.d/ https://raw.githubusercontent.com/coralogix-resources/elk-course-samples/master/csv-read.conf
+# sudo /usr/share/logstash/bin/logstash -f /etc/logstash/conf.d/csv-read.conf
+# curl -XGET 'localhost:9200/demo-csv/_search?pretty=true
+
+# sudo wget -P /etc/logstash/conf.d/ https://raw.githubusercontent.com/coralogix-resources/elk-course-samples/master/csv-read-drop.conf
+# sudo /usr/share/logstash/bin/logstash -f /etc/logstash/conf.d/csv-read-drop.conf
+# curl -XGET 'localhost:9200/demo-csv-drop/_search?pretty=true
+# curl -XGET 'localhost:9200/demo-csv-drop/_mapping/field/age?pretty=true
+-----------------------------------------------
+==> [56. "Importing JSON Data With Logstash" ]
+
+Logstash: Import & Parse JSON
+	- Java Script Object Notation
+	- Key/value pair
+
+=> JSON Basic concept	
+	- Structured in Key/Value pairs and ordered lists
+	- Keys and Values are separated by a colon ":"
+	- Double quotes surround each key
+	- Key/Value pairs are separated by a comma ","
+	- JSON filetype extention is .json
+	
+=> JSON Data Types
+	- Booleans: True or false values
+		* {"member":true}
+	- Strings: Unicode characters that are wrapped in double quotes.
+		* {"name":"Emma"}
+	- Numbers: Numeric character without quotes.
+		* {"age":41}
+	- Null: An empty value
+		* {"lastName":null}
+	- Arrays: Ordered list, wrapped in square brackets and can include other JSON Object.
+		* {"customer":{"name":"Emma","member":"true"} }
+	- JSON Objects: Written as a collection of key.value pairs and wrapped in curly brackets.
+		* {"orderItems":["camera","light","lens"] }
+
+=> 	Logstash JSON Filter
+JSON-1, JSON-2, JSON-3 ---->> Logstash -----(Parse & Filter)------>> Elasticsearch
+
+# mkdir /home/anon/json-data ; cd /home/anon/json-data
+# wget https://media.sundog-soft.com/es/sample-json.log
+
+# cd /etc/logstash/conf.d/
+# sudo vim json-read.conf
+input {
+	file {
+		start_position => "beginning"
+		path => "/home/anon/json-data/sample-json.log"
+		sincedb_path => "/dev/null"
+		}
+}
+filter {
+	json {
+		source => "message"
+	}
+}
+output {
+	elasticsearch { 
+		hosts => "http://localhost:9200"
+		index => "demo-json"
+		}
+	stdout {}
+}
+
+
+# sudo /usr/share/logstash/bin/logstash -f /etc/logstash/conf.d/json-read.conf
+# curl localhost:9200/demo-json/_search?pretty=true
+
+# cp /etc/logstash/conf.d/json-read.conf /etc/logstash/conf.d/json-drop.conf
+# vim /etc/logstash/conf.d/json-drop.conf
+input {
+	file {
+		start_position => "beginning"
+		path => "/home/anon/json-data/sample-json.log"
+		sincedb_path => "/dev/null"
+		}
+}
+filter {
+	json {
+		source => "message"
+	}
+	if [paymentType] == "Mastercard" 
+	{
+		drop {}
+	}
+	mutate {
+		remove_field => ["message", "@timestamp", "path", "host", "@verson"]
+	}
+}
+output {
+	elasticsearch { 
+		hosts => "http://localhost:9200"
+		index => "demo-json-drop"
+		}
+	stdout {}
+}
+
+# sudo /usr/share/logstash/bin/logstash -f /etc/logstash/conf.d/json-drop.conf
+# curl localhost:9200/demo-json-drop/_search?pretty=true
+
+# cd json-data
+# wget https://media.sundog-soft.com/es/sample-json-split.log
+# vim /etc/logstash/conf.d/json-split.conf
+input {
+	file {
+		# type => "json"
+		start_position => "beginning"
+		path => "/home/anon/json-data/sample-json-split.log"
+	}
+}
+filter {
+	json 	{ source => "message"	}
+	split 	{ field => "["pastEvents"]"	}
+	mutate	{ remove_field => ["message","@timestamp","path","host","@version"]}
+}
+
+output {
+	elasticsearch {
+		hosts => "http://localhost:9200"
+		index => "demo-json-split"
+	}
+	stdout {}
+}
+
+# sudo /usr/share/logstash/bin/logstash -f /etc/logstash/conf.d/json-split.conf
+# curl "http://localhost:9200/demo-json-split/_search?pretty=true"
+
+
+# cp /etc/logstash/conf.d/json-split.conf /etc/logstash/conf.d/json-split-structured.conf
+# vim /etc/logstash/conf.d/json-split-structured.conf
+input {
+	file {
+		# type => "json"
+		start_position => "beginning"
+		path => "/home/anon/json-data/sample-json-split.log"
+	}
+}
+filter {
+	json 	{ source => "message"	}
+	split 	{ field => "["pastEvents"]"	}
+	mutate	{ remove_field => ["message","@timestamp","path","host","@version"]}
+	
+	add_field => {
+		"eventId" => "%{[pastEvents][eventId]}"
+		"transactionId" => "%{[pastEvents][transactionId]}"
+		}
+	remove_field => ["message", "@timestamp", "path", "host", "@verson","pastEvents"] 
+	}
+}
+output {
+	elasticsearch {
+		hosts => "http://localhost:9200"
+		index => "demo-json-split-structured"
+		}
+	stdout {}
+	}
+
+
+# sudo /usr/share/logstash/bin/logstash -f /etc/logstash/conf.d/json-split-structured.conf
+# curl -XGET "http://localhost:9200/demo-json-split-/_search?pretty=true"
+
+-----------------------------------------------
+==> [57]
