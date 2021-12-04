@@ -6,6 +6,77 @@
 # http://media.sundog-soft.com/es7/IndexTags.py
 # http://media.sundog-soft.com/es/sayt.txt
 ******************************************************************************
+-----------------------------------------------
+==> [4. "Elasticsearch Overview" ]
+
+The Elastic Stack
+
+=> Elasticsearch
+	- Started off as scalable Lucene
+	- Horzontally scalable search engine
+	- Each "shard" is an inverted index of documents
+	- But not just for full text search!
+	- Can handle structured data, and canaggregate data quickly
+	- Often a faster solution than Hadoop/Spark/Flink/etc.
+	- curl -XGET "http://127.0.0.1/tags/_search?pretty"
+
+=> Kibana
+	- Web UI for searching and visualizing
+	- Complex aggregations, graphs, charts
+	- Often used for log analysis
+	
+=> Logstash/Beats
+	- Ways to feed data into elasticsearch
+	- FileBeat can monitor log files, parse them, and import into elasticsearch in near-real-time
+	- Logstash also pushes data into elasticsearch from many machines
+	- Not just log files
+
+=> X-Pack
+	- Security
+	- Altering
+	- Monitoring
+	- Reporting
+	- Machine Learning
+	- Graph Exploration
+-----------------------------------------------
+==> [5. Intro to Http and RESTful API's]
+
+Rest: A Quick Intro
+
+=> Anatomy of A Http Request
+	- METHOD: 	The "verb" of the request. GET, POST, PUT, or DELETE
+	- PROTOCOL:	What flavour of HTTP( HTTP/1.1)
+	- HOST:		What web server you want to talk to
+	- URL:		What resource is being requested
+	- BODY:		Extra data needed by the server
+	- HEADERS:	User-agent, content-type, etc.
+
+=> Restful Api's
+	- Pragmatic Definition: Using HTTP request to communicate with web services
+	Example:
+		GET requests retrieve information (like search results)
+		PUT requests insert or replace new information
+		DELETE requests delete information
+
+=> Rest Fancy-speak
+	- Representational State Transfer
+	- Six guiding constraints:
+		Client-server architecture
+		Statelessness
+		Cacheability
+		Layered system
+		Code on demand (ie, sending Javascript)
+		Uniform interface
+
+=> Why Rest ?
+	- Language and system independent
+
+=> The curl Command
+	- A way to issue HTTP requests from the command line
+	- From code, we'll use whatever library you use for HTTP/REST in the the same way.
+	- curl -H "Content-Type: application/json" <URL> -d '<Body>'
+	
+-----------------------------------------------
 # vim /etc/elasticsearch/elasticsearch.yml
 node.name: node-1
 network.host: 0.0.0.0
@@ -14,6 +85,17 @@ cluster.initial_master_nodes: ["node-1"]
 
 # curl -XGET 127.0.0.1:9200
 # wget http://media.sundog-soft.com/es7/shakes-mapping.json
+# cat shakes-mapping.json
+{
+        "mappings" : {
+                "properties" : {
+                        "speaker" : {"type": "keyword" },
+                        "play_name" : {"type": "keyword" },
+                        "line_id" : { "type" : "integer" },
+                        "speech_number" : { "type" : "integer" }
+                }
+        }
+}
 # curl -H "Content-Type: application/json" -XPUT 127.0.0.1:9200/shakespeare --data-binary @shakes-mapping.json
 
 # wget http://media.sundog-soft.com/es7/shakespeare_7.0.json
@@ -28,7 +110,7 @@ chmod 600 /path/to/my_pwd_file.tmp
 sudo systemctl set-environment ES_KEYSTORE_PASSPHRASE_FILE=/path/to/my_pwd_file.tmp
 sudo systemctl start elasticsearch.service
 
-curl -XGET 'http://localhost:9200/ilebear-*'/_search?pretty'
+curl -XGET 'http://localhost:9200/ilebear-*/_search?pretty'
 -----------------------------------------------
 GET _search 
 {
@@ -90,14 +172,17 @@ anon@host211:~$ source .profile
 anon@host211:~$ which curl
 /home/anon/bin/ curl 
 
+18. Import a Single Movie via JSON/REST
 ==> Import a Single Movie Via JSON
 # curl -XPUT 127.0.0.1:9200/movies -d '{ "mappings": { "properties": {"year": {"type":"date"}}}}'
 # curl -XGET 127.0.0.1:9200/_mappings 
 # curl -XPUT 127.0.0.1:9200/movies/_doc/109487 -d '{"genre" : ["IMAX","Sci-Fi"], "title": "Interstellar", "year" : 2014 }'
 # curl -XGET 127.0.0.1:9200/movies/_search?pretty
 
+19. Insert Many Movies at once with the bulk API
 ==> Import a Bulk Movie Via JSON
-
+# wget http://media.sundog-soft.com/es7/movies.json
+# cat movies.json
 { "create" : { "_index" : "movies", "_id" : "135569" } }
 { "id": "135569", "title" : "Star Trek Beyond", "year":2016 , "genre":["Action", "Adventure", "Sci-Fi"] }
 { "create" : { "_index" : "movies", "_id" : "122886" } }
@@ -114,12 +199,12 @@ anon@host211:~$ which curl
 ==> Updating data in elasticsearch ( immutable, but when updating version number incremented)
 # curl -XPOST 127.0.0.1:9200/movies/_doc/109487/_update -d '{"doc":{"title":"Interstellar"}}'
 
-==> Deleting data in elasticsearch
+==>[21] Deleting data in elasticsearch
 # curl -XGET 127.0.0.1:9200/movies/_search?q=Dark
 (found id=58559)
 # curl -XDELETE 127.0.0.1:9200/movies/_doc/58559?pretty
 
-==> Deleaing with Concurrency. 
+==> [23] Deleaing with Concurrency. 
 - Optimistic concurrency control (use retry_on _conflicts = N to automatically retry.)
 
 # curl -XGET 127.0.0.1:9200/movies/_doc/109487?pretty
@@ -130,29 +215,59 @@ anon@host211:~$ which curl
 
 
 ==> Using Analyzer & Tokenizer
-
+https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-analyze.html
 [Using Analyzer]
 - Somethimes text fields should be exact match
 	* Use Keyword mapping instead of text
 - Search on analyzed text fields will return anything remotely relevant
-	* Depending on the analyzer, result will be cas-insensitive, stemmed, stopwords removed, synonyms applied, etc.
+	* Depending onAnd KeywordAnalyzer again does nothing. So, KeywordAnalyzer is used for things like ID or phone numbers, but not for usual text.
+ the analyzer, result will be cas-insensitive, stemmed, stopwords removed, synonyms applied, etc.
 	* Searches with multiple terms need not match them all
 
+https://www.elastic.co/guide/en/elasticsearch/reference/current/analysis.html
+=> [Text Analyzer]
+	- "Text analysis" is the process of converting unstructured text, like the body of an email or a product description, into a structured format that’s optimized for search.
+	- If your index doesn’t contain text fields, no further setup is needed; you can skip the pages in this section.
+	- if you use text fields or your text searches aren’t returning results as expected, configuring text analysis can often help
+	- Should look into analysis configuration if you’re using Elasticsearch to :
+		* Build a search engine
+		* Mine unstructured data
+		* Fine-tune search for a specific language
+		* Perform lexicographic or linguistic research
+
+=> [Quick View]
+	- https://stackoverflow.com/questions/5483903/comparison-of-lucene-analyzers
+	- https://www.elastic.co/guide/en/elasticsearch/reference/7.15/analysis-custom-analyzer.html
+	- An analyzer is used at index Time and at search Time. It's used to create an index of terms.
+	- To index a phrase, it could be useful to break it in words. Here comes the analyzer.
+	- It applies tokenizers and token filters. A tokenizer could be a Whitespace tokenizer. It split a phrase in tokens at each space. A lowercase tokenizer will split a phrase at each non-letter and lowercase all letters.
+	- A token filter is used to filter or convert some tokens. For example, a ASCII folding filter will convert characters like ê, é, è to e.
+	- By default, Elasticsearch applies the standard analyzer. It will remove all common english words
+	- An analyzer is a mix of all of that.
+
+	- [Tokenizer] splits your text into chunks, and since different analyzers may use different tokenizers, you can get different output token streams, i.e. sequences of chunks of text. For example, KeywordAnalyzer you mentioned doesn't split the text at all and takes all the field as a single token. At the same time, StandardAnalyzer (and most other analyzers) use spaces and punctuation as a split points. For example, for phrase "I am very happy" it will produce list ["i", "am", "very", "happy"] (or something like that)
+	
+	- "Stemmers" are used to get the base of a word in question. It heavily depends on the language used. For example, for previous phrase in English there will be something like ["i", "be", "veri", "happi"] produced, and for French "Je suis très heureux" some kind of French analyzer (like SnowballAnalyzer, initialized with "French") will produce ["je", "être","tre", "heur"]. Of course, if you will use analyzer of one language to stem text in another, rules from the other language will be used and stemmer may produce incorrect results. It isn't fail of all the system, but search results then may be less accurate
+	- "KeywordAnalyzer" doesn't use any stemmers, it passes all the field unmodified. So, if you are going to search some words in English text, it isn't a good idea to use this analyzer.
+	
+	- "Stop words" are the most frequent and almost useless words. Again, it heavily depends on language. For English these words are "a", "the", "I", "be", "have", etc. Stop-words filters remove them from the token stream to lower noise in search results, so finally our phrase "I'm very happy" with StandardAnalyzer will be transformed to list ["veri", "happi"].
+	- And KeywordAnalyzer again does nothing. So, KeywordAnalyzer is used for things like ID or phone numbers, but not for usual text.
+	
+	- "StandAnalyzer" and "SmartCNAnalyzer". As I have to search text in Chinese. Obviously, SmartCnAnalyzer is better at handling Chinese. For diiferent purposes, you have to choose properest analyzer.
+	
 # curl -XGET 127.0.0.1:9200/movies/_search?pretty -d '{"query":{"match":{"title":"Star Trek"}}}'
 # curl -XGET 127.0.0.1:9200/movies/_search?pretty -d '{"query":{"match_phrase":{"genre":"sci"}}}'
 
 # curl -XDELETE 127.0.0.1:9200/movies/
 
-curl -XPUT 127.0.0.1:9200/movies -d '{
+curl -XPUT 127.0.0.1:9200/movies -d '{ 
 "mappings":{
 "properties": {
 "id": {"type":"integer"},
 "year": {"type":"date"},
 "genre" : {"type":"keyword"},
 "title" : {"type":"text","analyzer":"english"}
-}
-}
-}'
+}}}'
 
 # curl -XPUT 127.0.0.1:9200/movies -d '{"mappings":{"properties": {"id": {"type":"integer"},"year": {"type":"date"},"genre" : {"type":"keyword"},"title" : {"type":"text","analyzer":"english"}}}}'
 
@@ -178,8 +293,9 @@ curl -XPUT 127.0.0.1:9200/series -d '{
 # curl -XGET 127.0.0.1:9200/series/_search?pretty -d '{"query": {"has_child": {"type" : "film","query":{"match" : {"title":"The Force Awakens"}}}}}'
 
 
-==> Flattened Data Type
-
+==> 27.Flattened Data Type
+	- https://coralogix.com/blog/flattened-datatype-mappings-elasticsearch-tutorial/
+	- https://www.elastic.co/guide/en/elasticsearch/reference/master/flattened.html
 http://media.sundog-soft.com/es/flattened.txt
 wget files.grouplens.org/datasets/movielens/ml-latest-small.zip
 http://media.sundog-soft.com/es7/MoviesToJson.py
@@ -1026,15 +1142,13 @@ es.indices.refresh()
 50.[Logstash]
 
 ==> What Logstash for ::
-
 (( Files, S3, Beats, Kafka )) ===> Logstash ===> (( Elasticsearch,AWS,Hadoop,Mongodb ))
 
 ==> It's More than Plumbing
-
-- Logstash parses, transforms, and filters data as it passes through.
-- It can derive structure from unstructured data
-- It can anonymize personal data or exclude it entirely.
-- It can do geo-location lookups
+- Logstash "parses", "transforms", and filters data as it passes through.
+- It can "derive structure" from unstructured data
+- It can "anonymize" personal data or exclude it entirely.
+- It can do "geo-location" lookups
 - It can scale across many nodes
 - It guarantees at-least-once delivery
 - It absorbs thoroughput from load spikes
@@ -1058,7 +1172,7 @@ boundary - circonus - cloudwatch -csv - datadoghq - elasticsearch - email -exec 
 # vim /etc/logstash/conf.d/logstash.conf
 input {file {
 path => "/home/student/access_log"
-start_positioning => "beginning"
+start_position => "beginning"
 }}
 
 filter {
@@ -1072,11 +1186,11 @@ output {
 }
 
 # wget media.sundog-soft.com/es/access_log
-# sudo apt install openjdk-8-jre-headless jruby
+# sudo apt install openjdk-8-jre-headless
 # sudo apt update && sudo apt install logstash
 # sudo vim /etc/logstash/conf.d/logstash.conf
 
-
+https://www.elastic.co/guide/en/logstash/current/plugins-filters-grok.html
 -----------------------------------------------
 ==> [52. "Running Logstash" ]
 
@@ -1118,10 +1232,18 @@ input {
 # sudo apt install mysql-server
 # wget http://files.grouplens.org/datasets/movielens/ml-100k.zip
 # uzip ml-100k.zip
+# sudo mysql -uroot -ppassword
 # sudo mysql -u root -p
 > create database movielens;
-> create table movilens.movie (movieID INT primary Key Not Null, title Text, releaseDate date) ;
-> Load Data Local Infile 'ml-100k/u.item' Into Tables movielens.movies fields terminated by '}' (movieID, title, @var3) set releaseDate = STR_TO_DATE(@var3, '%d-%M-%Y' )  ;
+> create table movielens.movies (movieID INT primary Key Not Null, title Text, releaseDate date) CHARACTER SET utf8mb4;
+> load data local infile 'ml-100k/u.item' into table movielens.movies
+    -> CHARACTER SET utf8mb4
+    -> fields terminated by '|'
+    -> (movieID,title,@var3)
+    -> set releaseDate = str_to_date(@var3, '%d-%M-%Y');
+Note : 
+	=> SHOW GLOBAL VARIABLES LIKE 'local_infile';
+	=> SET GLOBAL local_infile=1; 					{1-On/enable, 0-off/disable}
 > use movielens;
 > select * from movies where title Like 'Star%';
 
@@ -1162,7 +1284,7 @@ output {
 # curl -XGET 'localhost:9200/movielens-sql/_search?q=title.Star&pretty'
 
 -----------------------------------------------
-==> [55. "Importing CSV Data With Logstash" ]
+==> [55. "Importing CSV Data With Logstash" ] //csv-read //csv-read-drop
 
 Logstash: Import & Parse CSV
 
@@ -1179,8 +1301,8 @@ What is CSV data ?
 
 # sudo wget -P /etc/logstash/conf.d/ https://raw.githubusercontent.com/coralogix-resources/elk-course-samples/master/csv-read-drop.conf
 # sudo /usr/share/logstash/bin/logstash -f /etc/logstash/conf.d/csv-read-drop.conf
-# curl -XGET 'localhost:9200/demo-csv-drop/_search?pretty=true
-# curl -XGET 'localhost:9200/demo-csv-drop/_mapping/field/age?pretty=true
+# curl -XGET localhost:9200/demo-csv-drop/_search?pretty=true
+# curl -XGET localhost:9200/demo-csv-drop/_mapping/field/age?pretty=true
 -----------------------------------------------
 ==> [56. "Importing JSON Data With Logstash" ]
 
@@ -1240,6 +1362,7 @@ output {
 
 # sudo /usr/share/logstash/bin/logstash -f /etc/logstash/conf.d/json-read.conf
 # curl localhost:9200/demo-json/_search?pretty=true
+# curl -XGET http://127.0.0.1:9200/_cat/indices/demo-json?v
 
 # cp /etc/logstash/conf.d/json-read.conf /etc/logstash/conf.d/json-drop.conf
 # vim /etc/logstash/conf.d/json-drop.conf
@@ -1259,7 +1382,7 @@ filter {
 		drop {}
 	}
 	mutate {
-		remove_field => ["message", "@timestamp", "path", "host", "@verson"]
+		remove_field => ["message", "@timestamp", "path", "host", "@version"]
 	}
 }
 output {
@@ -1273,6 +1396,7 @@ output {
 # sudo /usr/share/logstash/bin/logstash -f /etc/logstash/conf.d/json-drop.conf
 # curl localhost:9200/demo-json-drop/_search?pretty=true
 
+# http://127.0.0.1:9200/demo-csv-drop/_search?q=name:Rod&pretty
 # cd json-data
 # wget https://media.sundog-soft.com/es/sample-json-split.log
 # vim /etc/logstash/conf.d/json-split.conf
@@ -1335,4 +1459,636 @@ output {
 # curl -XGET "http://localhost:9200/demo-json-split-/_search?pretty=true"
 
 -----------------------------------------------
-==> [57]
+==> [57. "Logstash and S3"]
+
+What is S3
+	- Amazon Web Service's Simple Storage Service.
+	- Cloud-based distributed storage system
+
+Integration Is Easy-peasy.
+input { 
+	s3{
+		bucket => "sundog-es"
+		access_key_id => "ABCD****XY**Z"
+		secret_access_key =>
+		}
+	}
+filter {}
+output {}
+
+-----------------------------------------------
+==> [58 . "Parsing and Filtering Logstash with Grok" ]
+
+=> Structured Data Example: CSV
+
+=> UnStructured Data Example: Linux System Logs
+
+=> Regular Expressions:
+	- Regex Patter
+		: ^([a-zA-Z0-9_\-\.]+)@([a-zA-Z0-0_\-\.]+)\.([a-zA-Z]{2,3}))$
+	- Matches
+		: john@example.com
+
+=> Predefined Grok Patterns: https://www.elastic.co/guide/en/logstash/current/plugins-filters-grok.html
+
+=> Email Grok Pattern:
+			- %{EMAILADDRESS:client_email}
+
+Example:
+	Pattern:
+		- %{TIMESTAMP_ISO8601:time} %{LOGLEVEL:logvelvel} %{GREEDYDATA:logMessage}
+	Match
+		- 2020-07-16T19:20:21.45+01:00 DEBUG This is a sample log
+
+Testing Grok Patterns 
+		- Grok Debug Tool: https://grokdebug.herokuapp.com/
+
+mkdir 03-grok-examples
+wget http://media.sundog-soft.com/es/sample.log
+wget http://media.sundog-soft.com/es/grok-example.conf
+sudo /usr/share/logstash/bin/logstash -f /etc/logstash/conf.d/grok-example.conf  
+
+curl -XGET "http://localhost:9200/demo-grok/_search?pretty=true" -d'{"_source":["loglevel","time","logMessage"]}'
+curl -XDELETE "http://localhost:9200/demo-grok"
+
+wget http://media.sundog-soft.com/es/grok-example-02.conf
+sudo mv grok-example-02.conf grok-example-02.conf
+sudo /usr/share/logstash/bin/logstash -f /etc/logstash/conf.d/grok-example.conf
+curl -XGET "http://localhost:9200/demo-grok-multiple/_search?pretty=true" -d'{"_source":{"excludes":["@timestamp","host","path"]}}'
+-----------------------------------------------
+==> [59. "Logstash Grok Examples for Common Log Formats" ]
+
+sudo git clone https://github.com/coralogix-resource/logstash.git /etc/logstash/conf.d/logstash
+wget https://github.com/coralogix-resources/logstash/archive/refs/heads/master.zip
+
+https://media.sundog-soft.com/es/grok.txt
+
+==> NGINX ACCESS LOGS
+1. https://raw.githubusercontent.com/coralogix-resources/logstash/master/nginx/access.log
+2. https://grokdebug.herokuapp.com/
+
+3. https://raw.githubusercontent.com/coralogix-resources/logstash/master/nginx/nginx-access-final.conf
+input {
+	file {
+	   path => ["/etc/logstash/conf.d/logstash/nginx/access.log"]
+	   start_position => "beginning"
+	   sincedb_path => "/dev/null"
+	 }
+}
+filter {
+      grok {
+        match => { "message" => ["%{IPORHOST:remote_ip} - %{DATA:user_name} \[%{HTTPDATE:access_time}\] \"%{WORD:http_method} %{DATA:url} HTTP/%{NUMBER:http_version}\" %{NUMBER:response_code} %{NUMBER:body_sent_bytes} \"%{DATA:referrer}\" \"%{DATA:agent}\""] }
+        remove_field => "message"
+      }
+      mutate {
+        add_field => { "read_timestamp" => "%{@timestamp}" }
+      }
+      date {
+        match => [ "timestamp", "dd/MMM/YYYY:H:m:s Z" ]
+        remove_field => "timestamp"
+      }
+}
+output{
+  elasticsearch{
+    hosts => ["localhost:9200"] 
+    index => "nginx-access-logs-02" 
+  }
+  stdout { 
+    codec => "rubydebug"
+   }
+}
+4. 
+curl -XGET "http://localhost:9200/nginx-access-logs-02/_search?pretty" -d'{
+  "size": 1, 
+  "track_total_hits": true,
+  "query": {
+    "bool": {
+      "must_not": [
+        {
+          "term": {
+            "tags.keyword": "_grokparsefailure"
+          }
+        }
+      ]
+    }
+  }
+}'
+
+==> IIS LOGS
+5. https://raw.githubusercontent.com/coralogix-resources/logstash/master/iis/u_ex171118-sample.log
+
+6. https://raw.githubusercontent.com/coralogix-resources/logstash/master/iis/iis-final-working.conf
+input {
+      file {
+        path => ["/etc/logstash/conf.d/logstash/iis/u_ex171118-sample.log"]
+        start_position => "beginning"
+        sincedb_path => "/dev/null"
+      }
+    }
+
+filter {
+     grok {
+      match => {
+       "message" => ["%{TIMESTAMP_ISO8601:time} %{WORD:method} %{URIPATH:uri_requested} %{NOTSPACE:query} %{NUMBER:port} %{NOTSPACE:username} %{IPORHOST:client_ip} %{NOTSPACE:http_version} %{NOTSPACE:user_agent} %{NOTSPACE:cookie} %{URI:referrer_url} %{IPORHOST:host} %{NUMBER:http_status_code} %{NUMBER:protocol_substatus_code} %{NUMBER:win32_status} %{NUMBER:bytes_sent} %{NUMBER:bytes_received} %{NUMBER:time_taken}"
+       ]
+     }
+   }
+
+     mutate {
+      rename => {
+       "@timestamp" => "read_timestamp"
+      }
+     }
+     date {
+      match => [
+       "time",
+       "yyyy-MM-dd HH:mm:ss"
+      ]
+      target => "@timestamp"
+     }
+
+    mutate {
+    remove_field => ["message", "host", "@version", "path"]
+    }
+
+   #if "_grokparsefailure" in [tags] { drop{} }
+  
+}
+
+output {
+  elasticsearch {
+            hosts => [ "localhost:9200"]
+            index => "iis-log"
+        }
+  stdout { codec => rubydebug }
+}
+
+7.
+curl -XGET "http://localhost:9200/iis-log/_search?pretty" -d'{
+  "size": 1, 
+  "track_total_hits": true,
+  "query": {
+    "bool": {
+      "must_not": [
+        {
+          "term": {
+            "tags.keyword": "_grokparsefailure"
+          }
+        }
+      ]
+    }
+  }
+}'
+
+==> MONGODB LOGS
+8. https://raw.githubusercontent.com/coralogix-resources/logstash/master/mongodb/mongodb.log
+
+9. https://raw.githubusercontent.com/coralogix-resources/logstash/master/mongodb/mongodb-final.conf
+input {
+file {
+   path => ["/etc/logstash/conf.d/logstash/mongodb/mongodb.log"]
+   start_position => "beginning"
+   sincedb_path => "/dev/null"
+ }
+}
+filter {
+      grok {
+        match => { "message" => ["%{TIMESTAMP_ISO8601:timestamp}\s+%{NOTSPACE:severity}\s+%{NOTSPACE:component}\s+(?:\[%{DATA:context}\])?\s+%{GREEDYDATA:log_message}" ] }
+        remove_field => "message"
+      }
+      mutate {
+        add_field => { "read_timestamp" => "%{@timestamp}" }
+      }
+}
+output {
+  elasticsearch {
+            hosts => [ "localhost:9200"]
+            index => "mongo-logs-01"
+        }
+  stdout { codec => rubydebug }
+}
+
+10. 
+curl -XGET "http://localhost:9200/mongo-logs-01/_search?pretty" -d'{
+  "size": 1, 
+  "track_total_hits": true,
+  "query": {
+    "bool": {
+      "must_not": [
+        {
+          "term": {
+            "tags.keyword": "_grokparsefailure"
+          }
+        }
+      ]
+    }
+  }
+}'
+
+
+==> USER AGENT MAPPING AND IP TO GEO LOCATION MAPPING IN LOGS
+11. https://raw.githubusercontent.com/coralogix-resources/logstash/master/apache/access_log
+12. https://raw.githubusercontent.com/coralogix-resources/logstash/master/apache/apache-access-enriched.conf
+input {
+file {
+   path => ["/etc/logstash/conf.d/logstash/apache/access_log"]
+   start_position => "beginning"
+   sincedb_path => "/dev/null"
+ }
+}
+filter {
+      grok {
+         match => { "message" => ["%{COMBINEDAPACHELOG}"] }
+        remove_field => "message"
+      }
+      mutate {
+        add_field => { "read_timestamp" => "%{@timestamp}" }
+      }
+      date {
+        match => [ "timestamp", "dd/MMM/YYYY:H:m:s Z" ]
+        remove_field => "timestamp"
+      }
+     useragent {
+       source => "agent"
+       target => "agent"
+     }
+     geoip {
+       source => "clientip"
+       target => "geoip"
+     }
+}
+output {
+  elasticsearch {
+            hosts => [ "localhost:9200"]
+            index => "apache-logs"
+        }
+  stdout { codec => rubydebug }
+}
+
+13. 
+curl -XGET "http://localhost:9200/apache-logs/_search?pretty" -d'{
+  "size": 1,
+  "track_total_hits": true,
+  "query": {
+  "bool": {
+    "must_not": [
+      {
+        "term": {
+          "tags.keyword": "_grokparsefailure"
+        }
+      }
+    ]
+  }
+  }
+}'
+
+==> ELASTICSEARCH LOGS
+14. https://raw.githubusercontent.com/coralogix-resources/logstash/master/elasticsearch_logs/elasticsearch.log
+15. https://raw.githubusercontent.com/coralogix-resources/logstash/master/elasticsearch_logs/es-logs-final.conf
+input {
+  file {
+    path => "/etc/logstash/conf.d/logstash/elasticsearch_logs/elasticsearch.log"
+    type => "elasticsearch"
+    start_position => "beginning" 
+    sincedb_path => "/dev/null"
+    codec => multiline {
+      pattern => "^\["
+      negate => true
+      what => "previous"
+    }
+  }
+}
+
+filter {
+  if [type] == "elasticsearch" {
+    grok {
+      match => [ "message", "\[%{TIMESTAMP_ISO8601:timestamp}\]\[%{DATA:severity}%{SPACE}\]\[%{DATA:source}%{SPACE}\]%{SPACE}(?<message>(.|\r|\n)*)" ]
+      overwrite => [ "message" ]
+    }
+
+    if "_grokparsefailure" not in [tags] {
+      grok {  
+        match => [
+          "message", "^\[%{DATA:node}\] %{SPACE}\[%{DATA:index}\]%{SPACE}(?<short_message>(.|\r|\n)*)",
+          "message", "^\[%{DATA:node}\]%{SPACE}(?<short_message>(.|\r|\n)*)" ]
+        tag_on_failure => []
+      }
+    }
+  }
+}
+
+output {
+  elasticsearch {
+            hosts => [ "localhost:9200"]
+            index => "es-test-logs"
+        }
+  stdout { codec => rubydebug }
+}
+
+16.
+curl -XGET "http://localhost:9200/es-test-logs/_search?pretty" -d'{
+  "size": 1, 
+  "query": {
+    "bool": {
+      "must_not": [
+        {
+          "match": {
+            "tags": "multiline"
+          }
+        }
+      ]
+    }
+  }
+}'
+
+ELASTICSEARCH SLOW LOGS
+17. https://raw.githubusercontent.com/coralogix-resources/logstash/master/elasticsearch_slowlogs/es_slowlog.log
+
+18. https://raw.githubusercontent.com/coralogix-resources/logstash/master/elasticsearch_slowlogs/es-slowlog-final.conf
+# comment
+input{
+	file{
+		path => ["/etc/logstash/conf.d/logstash/elasticsearch_slowlogs/es_slowlog.log"]
+                start_position => "beginning"
+                sincedb_path => "/dev/null"
+		codec => plain {
+                    charset => "ISO-8859-15" #Reads plaintext with no delimiting between events
+        	}
+	}
+}
+filter {
+	grok {
+		match => { "message" => ['\[%{TIMESTAMP_ISO8601:timestamp}\]\[%{LOGLEVEL:level}\]\[%{HOSTNAME:type}\]%{SPACE}\[%{HOSTNAME:[node_name]}\]%{SPACE}\[%{WORD:[index_name]}\]%{NOTSPACE}%{SPACE}took\[%{NUMBER:took_micro}%{NOTSPACE}\]%{NOTSPACE}%{SPACE}%{NOTSPACE}%{NOTSPACE}%{SPACE}%{NOTSPACE}%{NOTSPACE}%{SPACE}%{NOTSPACE}%{NOTSPACE}%{SPACE}search_type\[%{WORD:search_type}\]%{NOTSPACE}%{SPACE}total_shards\[%{NUMBER:total_shards}\]%{NOTSPACE}%{SPACE}source%{GREEDYDATA:query}\Z']}
+	}
+	
+	mutate{
+		remove_field => ["@version","@timestamp","host","path","logTook"] 
+	}
+} 
+output{
+	elasticsearch{
+		hosts => ["localhost:9200"] 
+		index => "es-slow-logs" 
+	}
+	stdout { 
+		codec => "rubydebug"
+	 }
+}
+
+19. curl -XGET "http://localhost:9200/es-slow-logs/_search?pretty" -d'{  "size": 1}'
+
+MYSQL SLOW LOGS
+20. https://raw.githubusercontent.com/coralogix-resources/logstash/master/mysql_slowlogs/mysql-slow.log
+
+21. https://raw.githubusercontent.com/coralogix-resources/logstash/master/mysql_slowlogs/mysql-slowlogs.conf
+input {
+file {
+   path => ["/etc/logstash/conf.d/logstash/mysql_slowlogs/mysql-slow.log"]
+   start_position => "beginning"
+   sincedb_path => "/dev/null"
+   codec => multiline {
+          pattern => "^# Time: %{TIMESTAMP_ISO8601}"
+          negate => true
+          what => "previous"
+        }
+ }
+}
+filter {
+      mutate {
+        gsub => [
+          "message", "#", "",
+          "message", "\n", " "
+        ]
+        remove_field => "host"
+      }
+      grok {
+        match => { "message" => [
+              "Time\:%{SPACE}%{TIMESTAMP_ISO8601:timestamp}%{SPACE}User\@Host\:%{SPACE}%{WORD:user}\[%{NOTSPACE}\] \@ %{NOTSPACE:host} \[\]%{SPACE}Id\:%{SPACE}%{NUMBER:sql_id}%{SPACE}Query_time\:%{SPACE}%{NUMBER:query_time}%{SPACE}Lock_time\:%{SPACE}%{NUMBER:lock_time}%{SPACE}Rows_sent\:%{SPACE}%{NUMBER:rows_sent}%{SPACE}Rows_examined\:%{SPACE}%{NUMBER:rows_examined}%{SPACE}%{GREEDYDATA}; %{GREEDYDATA:command}\;%{GREEDYDATA}" 
+       ] }
+      }
+      
+      mutate {
+        add_field => { "read_timestamp" => "%{@timestamp}" }
+        #remove_field => "message"
+      }
+}
+output {
+  elasticsearch {
+            hosts => [ "localhost:9200"]
+            index => "mysql-slowlogs-01"
+        }
+  stdout { codec => rubydebug }
+}
+
+22.
+curl -XGET "http://localhost:9200/mysql-slowlogs-01/_search?pretty" -d'{
+  "size":1,
+  "query": {
+    "bool": {
+    "must_not": [
+      {
+        "term": {
+          "tags.keyword": "_grokparsefailure"
+        }
+      }
+    ]
+  }
+  }
+
+}'
+
+==> AWS ELASTIC LOAD BALANCER
+23. https://raw.githubusercontent.com/coralogix-resources/logstash/master/aws_elb/elb_logs.log
+
+24. https://raw.githubusercontent.com/coralogix-resources/logstash/master/aws_elb/aws-elb.conf
+input {
+file {
+   path => ["/etc/logstash/conf.d/logstash/aws_elb/elb_logs.log"]
+   start_position => "beginning"
+   sincedb_path => "/dev/null"
+ }
+}
+filter {
+      grok {
+        match => { "message" => ["%{TIMESTAMP_ISO8601:timestamp} %{NOTSPACE:loadbalancer} %{IP:client_ip}:%{NUMBER:client_port} (?:%{IP:backend_ip}:%{NUMBER:backend_port}|-) %{NUMBER:request_processing_time} %{NUMBER:backend_processing_time} %{NUMBER:response_processing_time} (?:%{NUMBER:elb_status_code}|-) (?:%{NUMBER:backend_status_code}|-) %{NUMBER:received_bytes} %{NUMBER:sent_bytes} \"(?:%{WORD:verb}|-) (?:%{GREEDYDATA:request}|-) (?:HTTP/%{NUMBER:httpversion}|-( )?)\" \"%{DATA:userAgent}\"( %{NOTSPACE:ssl_cipher} %{NOTSPACE:ssl_protocol})?"] }
+        remove_field => "message"
+      }
+}
+output {
+#if "_grokparsefailure" in [tags] {
+stdout { codec => rubydebug }
+#}
+elasticsearch {
+            hosts => [ "localhost:9200"]
+            index => "aws-elb-logs"
+        }
+}
+
+25.
+curl -XGET "http://localhost:9200/aws-elb-logs/_search?pretty" -d'
+{
+  "size": 1,
+  "query": {
+    "bool": {
+      "must_not": [
+        {
+        "term": {
+          "tags": {
+            "value": "_grokparsefailure"
+          }
+        }
+      }
+      ]
+    }
+  }
+}'
+
+==> AWS APPLICATION LOAD BALANCER
+26. https://raw.githubusercontent.com/coralogix-resources/logstash/master/aws_alb/alb_logs.log
+
+27. https://raw.githubusercontent.com/coralogix-resources/logstash/master/aws_alb/aws-alb.conf
+input {
+file {
+   path => ["/etc/logstash/conf.d/logstash/aws_alb/alb_logs.log"]
+   start_position => "beginning"
+   sincedb_path => "/dev/null"
+ }
+}
+filter {
+      grok {
+        match => { "message" => ["%{NOTSPACE:request_type} %{TIMESTAMP_ISO8601:log_timestamp} %{NOTSPACE:alb-name} %{NOTSPACE:client}:%{NUMBER:client_port} (?:%{IP:backend_ip}:%{NUMBER:backend_port}|-) %{NUMBER:request_processing_time} %{NUMBER:backend_processing_time} %{NOTSPACE:response_processing_time:float} %{NOTSPACE:elb_status_code} %{NOTSPACE:target_status_code} %{NOTSPACE:received_bytes:float} %{NOTSPACE:sent_bytes:float} %{QUOTEDSTRING:request} %{QUOTEDSTRING:user_agent} %{NOTSPACE:ssl_cipher} %{NOTSPACE:ssl_protocol} %{NOTSPACE:target_group_arn} %{QUOTEDSTRING:trace_id}"] }
+        remove_field => "message"
+      }
+}
+output {
+#if "_grokparsefailure" in [tags] {
+stdout { codec => rubydebug }
+#}
+elasticsearch {
+            hosts => [ "localhost:9200"]
+            index => "aws-alb-logs"
+        }
+}
+
+28.
+curl -XGET "http://localhost:9200/aws-alb-logs/_search?pretty" -d'
+{
+  "size": 1,
+  "query": {
+    "bool": {
+      "must_not": [
+        {"term": {
+          "tags": {
+            "value": "_grokparsefailure"
+          }
+        }
+      }
+      ]
+    }
+  }
+}'
+
+==> AWS CLOUDFRONT
+29. https://raw.githubusercontent.com/coralogix-resources/logstash/master/aws_cloudfront/cloudfront_logs.log
+
+30. https://raw.githubusercontent.com/coralogix-resources/logstash/master/aws_cloudfront/aws-cloudfront.conf
+input {
+file {
+   path => ["/etc/logstash/conf.d/logstash/aws_cloudfront/cloudfront_logs.log"]
+   start_position => "beginning"
+   sincedb_path => "/dev/null"
+ }
+}
+
+filter {
+mutate {
+        gsub => [
+          "message", "\t", " ",
+          "message", "\n", " "
+        ]
+      }
+grok {
+        match => { "message" => [
+              "%{DATE:date}[ \t]%{TIME:time}[ \t]%{DATA:x_edge_location}[ \t](?:%{NUMBER:sc_bytes}|-)[ \t]%{IP:c_ip}[ \t]%{WORD:cs_method}[ \t]%{HOSTNAME:cs_host}[ \t]%{NOTSPACE:cs_uri_stem}[ \t]%{NUMBER:sc_status}[ \t]%{GREEDYDATA:referrer}[ \t]%{NOTSPACE:user_agent}[ \t]%{GREEDYDATA:cs_uri_query}[ \t]%{NOTSPACE:cookie}[ \t]%{WORD:x_edge_result_type}[ \t]%{NOTSPACE:x_edge_request_id}[ \t]%{HOSTNAME:x_host_header}[ \t]%{URIPROTO:cs_protocol}[ \t]%{INT:cs_bytes}[ \t]%{NUMBER:time_taken}[ \t]%{NOTSPACE:x_forwarded_for}[ \t]%{NOTSPACE:ssl_protocol}[ \t]%{NOTSPACE:ssl_cipher}[ \t]%{NOTSPACE:x_edge_response_result_type}[ \t]%{NOTSPACE:cs_protocol_version}[ \t]%{NOTSPACE:fle_status}[ \t]%{NOTSPACE:fle_encrypted_fields}[ \t]%{NOTSPACE:c_port}[ \t]%{NOTSPACE:time_to_first_byte}[ \t]%{NOTSPACE:x_edge_detailed_result_type}[ \t]%{NOTSPACE:sc_content_type}[ \t]%{NOTSPACE:sc_content_len}[ \t]%{NOTSPACE:sc_range_start}[ \t]%{NOTSPACE:sc_range_end}" 
+       ] }
+      }
+mutate {
+  remove_field => "message"
+}
+if "_grokparsefailure" in [tags] { drop {} }
+}
+
+output {
+stdout { codec => rubydebug }
+elasticsearch {
+            hosts => [ "localhost:9200"]
+            index => "aws-cloudfront-logs"
+        }
+}
+
+31.
+curl -XGET "http://localhost:9200/aws-cloudfront-logs/_search?pretty" -d'
+{
+  "query": {
+    "bool": {
+      "must_not": [
+        {"term": {
+          "tags": {
+            "value": "_grokparsefailure"
+          }
+        }
+      }
+      ]
+    }
+  }
+}'
+
+CLEANUP
+curl -XDELETE localhost:9200/nginx-access-logs-02
+curl -XDELETE localhost:9200/iis-log
+curl -XDELETE localhost:9200/mongo-logs-01
+curl -XDELETE localhost:9200/apache-logs
+curl -XDELETE localhost:9200/es-test-logs
+curl -XDELETE localhost:9200/es-slow-logs
+curl -XDELETE localhost:9200/mysql-slowlogs-01
+curl -XDELETE localhost:9200/aws-elb-logs
+curl -XDELETE localhost:9200/aws-alb-logs
+curl -XDELETE localhost:9200/aws-cloudfront-logs
+
+-----------------------------------------------
+==> [60. "Logstash Input Plugins, Part-1: Hearbeat"]
+
+https://github.com/coralogix-resources/logstash-input-plugins.git
+wget https://github.com/coralogix-resources/logstash-input-plugins/archive/refs/heads/master.zip
+
+raw.githubusercontent/2arunpmohan/logstash-input-plugins/master/heartbeat/heartbeat.conf
+
+input { 
+	heartbeat { 
+	message => "ok"
+	interval => 5
+	type => "heartbeat"
+	}
+}
+output{
+	if [type] == "heatbeat" {
+	elasticsearch { 
+	hosts => "http://localhost:9200"
+	index => "heartbeat"
+	}
+}
+stdout {codec => "rubydebug"}
+}
+
+
+#sudo /usr/share/logstash/bin/logstash -f /etc/logstash/conf.d/logstash-input-plugins/heartbeat/heartbeat.conf
+#curl -XGET "http://localhost:9200/heartbeat/_search?pretty=true" -d'{"size":1}'
+
+#sudo /usr/share/logstash/bin/logstash -f /etc/logstash/conf.d/logstash-input-plugins/heartbeat/heartbeat-epoch.conf
+#curl -XGET "http://localhost:9200/heartbeat-epoch/_search?pretty=true" -d'{"size":1}'
+
+#sudo /usr/share/logstash/bin/logstash -f /etc/logstash/conf.d/logstash-input-plugins/heartbeat/heartbeat-sequence.conf
+#curl -XGET "http://localhost:9200/heartbeat-sequence/_search?pretty=true" -d'{ "sort": [{ "@timestamp": {"order":"asc"} } ] }'
+
+-----------------------------------------------
+==> [61. "Logstash Input Plugins, Part-2: Generator Input and Dead Letter"]
