@@ -1,0 +1,197 @@
+https://player.vimeo.com/video/423553227	Command Injection II		
+https://player.vimeo.com/video/423553242	Command Injection III	
+https://player.vimeo.com/video/440991021	Vulnerable File Backup Utility - Command Injection	
+https://player.vimeo.com/video/440991005	Vulnerable Online Calculator - Code Injection	
+https://player.vimeo.com/video/423553210	Blind Time Based SQL Injection
+https://player.vimeo.com/video/423955516	Online Airline Booking System	
+https://player.vimeo.com/video/583829296	Unlimited Attempts
+https://player.vimeo.com/video/583829086	API Security
+https://player.vimeo.com/video/440991035	Improper Session Management III(A3)
+https://player.vimeo.com/video/440991050	Vulnerable Bank Portal: Dictionary Attack(A3)
+https://player.vimeo.com/video/424101020	CVE-2018-12604 (A3)
+https://player.vimeo.com/video/429184710	Apache Solr 8.1.1 (A4)
+https://player.vimeo.com/video/428353735	CVE-2018-9038 (A5)
+https://player.vimeo.com/video/423469050 	Vulnerable Apache (A5)
+https://player.vimeo.com/video/423959661	BloofoxCMS(A5)
+https://player.vimeo.com/video/583829019	Path Traversal(A5)
+https://player.vimeo.com/video/423997534	MyBB Downloads Plugin (A7)
+https://player.vimeo.com/video/423997601	ApPHP MicroBlog(A7)
+https://player.vimeo.com/video/583829221	DOM based XSS (A7)
+https://player.vimeo.com/video/583829165	Reflected XSS
+https://player.vimeo.com/video/430555966	PHP Object Injection
+
+==> Recon
+Memcached
+https://player.vimeo.com/video/423046728	Memcached
+https://player.vimeo.com/video/423046746	Memcached Recon: Dictionary Attack
+
+webservers
+https://player.vimeo.com/video/423067378	Apache Recon: Basics
+https://player.vimeo.com/video/423067332	Nginx Recon: Basics
+https://player.vimeo.com/video/423068475	NodeJS Recon: Basics
+
+Dns
+https://player.vimeo.com/video/423028562	DNS: Basic Queries
+https://player.vimeo.com/video/423028570	DNS: Zone Transfer Enabled
+https://player.vimeo.com/video/423028578	DNS: DNSSEC Enabled
+
+SQL Database
+https://player.vimeo.com/video/423048694	MySQL Recon: Basics
+https://player.vimeo.com/video/423048728	PostgreSQL Recon: Basics
+
+FTP Servers
+https://player.vimeo.com/video/488040041	ProFTP Recon: Basics
+https://player.vimeo.com/video/488040137	VSFTPD Recon: Dictionary Attack
+
+Web Application- 
+https://player.vimeo.com/video/422323674	Directory Enumeration with Dirb
+https://player.vimeo.com/video/422323822	Scanning Web Application with Nikto
+https://player.vimeo.com/video/422323881	Active Crawling with ZAProxy
+
+==> Exploitation
+Metasploit:
+https://player.vimeo.com/video/424278048	Vulnerable File Sharing Service
+https://player.vimeo.com/video/424276025	Meterpreter Basics
+https://player.vimeo.com/video/424277626	Vulnerable Web Server
+https://player.vimeo.com/video/424278076	Vulnerable FTP Server
+https://player.vimeo.com/video/424278246	Vulnerable Java RMI Server
+
+Password_Cracking:
+https://player.vimeo.com/video/423449544	Cracking WinZIP Archives
+https://player.vimeo.com/video/423442201	Cracking MD5Crypt Digests
+https://player.vimeo.com/video/423442244	Cracking Bcrypt Hashes
+
+Web Application:
+https://player.vimeo.com/video/422323947	SQL Injection with SQLMap
+https://player.vimeo.com/video/422323976	Attacking HTTP Authentication with Hydra
+https://player.vimeo.com/video/422324069	Attacking HTTP Login Form with Burp Suite
+https://player.vimeo.com/video/423553103	Command Injection
+https://player.vimeo.com/video/430555890	RCE via MySQL
+https://player.vimeo.com/video/430555935	Pickle Deserialization RCE
+
+
+==> Post Exploitation
+Metasploit_Post_Modules:
+https://player.vimeo.com/video/424273984	Post Exploitation Lab I
+https://player.vimeo.com/video/424273995	Post Exploitation Lab II
+https://player.vimeo.com/video/668540458	PHPMyAdmin Credential Stealing
+
+Browser_Forensics:
+https://player.vimeo.com/video/423454826	Firefox History
+https://player.vimeo.com/video/423454840	Firefox: Logins and Passwords
+https://player.vimeo.com/video/423454852	Firefox Cookies
+https://player.vimeo.com/video/423454917	Chrome Bookmarks
+https://player.vimeo.com/video/423454985	Chrome Cookies
+
+Lateral Movement:
+https://player.vimeo.com/video/441270562	Internal Network I
+
+Priviledge Esclation
+=======================
+Basic
+https://player.vimeo.com/video/423163298	Exploiting Setuid Programs
+https://player.vimeo.com/video/423419038	Shared Server
+https://player.vimeo.com/video/423163331	Cron Jobs Gone Wild!
+https://player.vimeo.com/video/423420605	Fallen Guardian
+https://player.vimeo.com/video/423163357	Permissions Matter!
+https://player.vimeo.com/video/423163532	Editing Gone Wrong
+https://player.vimeo.com/video/423163609	The Golden Logs
+https://player.vimeo.com/video/423164208	Load Order Matters
+https://player.vimeo.com/video/423164565	Restricted Shell
+https://player.vimeo.com/video/439273141	Chroot Jail I
+
+Pivoting
+=========
+https://player.vimeo.com/video/423430554	Pivoting I
+https://player.vimeo.com/video/423430776	Pivoting IV
+https://player.vimeo.com/video/423430959	Pivoting VI
+https://player.vimeo.com/video/423431008	Pivoting VII
+https://player.vimeo.com/video/423431047	Pivoting VIII
+
+Maintain-access
+================
+https://player.vimeo.com/video/439563136	Leveraging PostgreSQL
+											Leveraging MongoDB
+https://player.vimeo.com/video/439563152	Leveraging Memcache
+https://player.vimeo.com/video/439563172	Maintaining access I
+https://player.vimeo.com/video/439563279	Maintaining access II
+https://player.vimeo.com/video/439563302	Maintaining access III
+https://player.vimeo.com/video/439563339	Maintaining access IV
+
+MITRE ATT&CK
+================
+Discovery:
+T1087 : Software Discovery I	https://attack.mitre.org/techniques/T1087/
+T1518 : Software Discovery I	https://attack.mitre.org/techniques/T1033/
+T1057 : Process Discovery		https://attack.mitre.org/techniques/T1057/
+T1003: Credential Dumping		https://attack.mitre.org/techniques/T1003		
+
+https://github.com/pchaigno/dga-collection
+https://github.com/Ne0nd0g/merlin
+https://attack.mitre.org/techniques/T1095/
+
+AWS
+====
+IAM
+https://player.vimeo.com/video/528818723	IAM Enumeration
+https://player.vimeo.com/video/528819150	Misconfigured Trust Policy
+https://player.vimeo.com/video/528819230	Overly Permissive Permission I
+https://player.vimeo.com/video/528819294	Dangerous Policy Combination I
+https://player.vimeo.com/video/528819451	Dangerous Policy Combination II
+https://player.vimeo.com/video/528819626	Overly Permissive Permission II
+https://player.vimeo.com/video/528819818	Pass Role : EC2
+https://player.vimeo.com/video/528819694	Pass Role : Lambda
+https://player.vimeo.com/video/528820018	Pass Role : CloudFormation
+https://github.com/ine-labs/AWSGoat
+
+S3
+https://player.vimeo.com/video/528901277	S3 Enumeration
+https://player.vimeo.com/video/437829957	S3 Basics
+https://player.vimeo.com/video/528901369	Sensitive Data Exposure
+https://player.vimeo.com/video/528901460	Hardcoded Credentials
+https://player.vimeo.com/video/528901548	Readable Bucket Policy
+https://player.vimeo.com/video/528901633	Special Request
+https://player.vimeo.com/video/528901716	Writable Bucket Policy
+https://player.vimeo.com/video/528901784	Writable Bucket ACL
+https://player.vimeo.com/video/528901845	Writable Object ACL
+https://player.vimeo.com/video/528901908	Chaining Attacks
+https://player.vimeo.com/video/439266114	S3 Python Object Store
+
+DynamoDB
+https://player.vimeo.com/video/439267071	DynamoDB Basics I
+https://player.vimeo.com/video/439267085	DynamoDB Basics II
+https://player.vimeo.com/video/439267124	DynamoDB Admin GUI Client
+https://player.vimeo.com/video/439267143	DynamoDB NoSQL Injection I
+https://player.vimeo.com/video/439267171	DynamoDB NoSQL Injection II
+https://player.vimeo.com/video/439267193	DynamoDB Python Object Store
+
+API_Gateway
+https://player.vimeo.com/video/528917270	API Gateway Enumeration
+https://player.vimeo.com/video/528917425	Verb Tampering
+https://player.vimeo.com/video/528917524	Misconfigured Private API
+https://player.vimeo.com/video/528917669	IAM based Authentication
+https://player.vimeo.com/video/528917765	Denial of Service
+https://player.vimeo.com/video/528917856	Poor Lambda Authorizer
+	
+Lambda
+https://player.vimeo.com/video/528915503	Lambda Enumeration
+https://player.vimeo.com/video/528915640	Command Injection
+https://player.vimeo.com/video/528915749	Insecure Deserialization
+https://player.vimeo.com/video/528916051	Server Side Request Forgery
+https://player.vimeo.com/video/528915828	XML External Entity : Python Runtime
+https://player.vimeo.com/video/528915919	XML External Entity : PHP Runtime
+https://player.vimeo.com/video/528916164	Retrieving Invocation Event
+https://player.vimeo.com/video/528916230	Lambda Alias Routing
+https://player.vimeo.com/video/528916579	Dictionary Attack via Lambda	
+https://player.vimeo.com/video/528916317	Lambda Backdoor
+https://player.vimeo.com/video/528916458	Persistent Access on Lambda
+
+Database
+https://player.vimeo.com/video/528914490	Database Enumeration
+https://player.vimeo.com/video/528914070	DynamoDB : SQL Injection
+https://player.vimeo.com/video/528914147	DynamoDB : NoSQL Injection
+https://player.vimeo.com/video/528914274	RDS : SQL Injection
+https://player.vimeo.com/video/528914347	DocumentDB : NoSQL Injection
+
+Docker
+https://player.vimeo.com/video/488042537	Docker Basics Lab
